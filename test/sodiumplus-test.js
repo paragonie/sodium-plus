@@ -70,4 +70,12 @@ describe('SodiumPlus', () => {
         expect(decrypted.toString('hex')).to.be.equals(plaintext.toString('hex'));
         expect(ciphertext.toString('hex')).to.not.equals(ciphertext2.toString('hex'));
     });
+
+    it('SodiumPlus.crypto_auth', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let key = await sodium.crypto_auth_keygen();
+        let message = 'Science, math, technology, engineering, and compassion for others.';
+        let mac = await sodium.crypto_auth(message, key);
+        assert(await sodium.crypto_auth_verify(message, key, mac) === true);
+    });
 });
