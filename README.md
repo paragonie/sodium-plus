@@ -1,5 +1,8 @@
 # Sodium-Plus (Na+)
 
+[![Travis CI](https://travis-ci.org/paragonie/sodium-plus.svg?branch=master)](https://travis-ci.org/paragonie/sodium-plus)
+[![npm version](https://img.shields.io/npm/v/sodium-plus.svg)](https://npm.im/sodium-plus)
+
 Developer-friendly libsodium API.
 
 (Very early work in progress. Not suitable for production use yet.)
@@ -52,3 +55,8 @@ This should produce output similar to below (but with different random-looking b
 <Buffer 9f fd 9c f9 b7 06 94 ae a4 46 fb 31 a2 aa 82 e8 8a e4 6f 0d 24 21 87 6e 49 89 09 8b 38 b3 67 a3 a5 46 1c 2c 23 13 c9 e7 fb 64 32>
 This is just a test message
 ```
+
+## Support Contracts
+
+If your company uses this library in their products or services, you may be
+interested in [purchasing a support contract from Paragon Initiative Enterprises](https://paragonie.com/enterprise).
