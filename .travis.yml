@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - "12"
+
+script:
+  - npm test # Test without sodium-native
+  - npm install --save sodium-native
+  - npm test # Test with sodium-native
