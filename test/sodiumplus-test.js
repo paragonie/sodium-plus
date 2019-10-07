@@ -1,7 +1,7 @@
 const assert = require('assert');
 const { describe, it } = require('mocha');
 const { expect } = require('chai');
-const { CryptographyKey, SodiumPlus } = require('../index');
+const { CryptographyKey, SodiumPlus, X25519PublicKey, X25519SecretKey } = require('../index');
 const VERBOSE = false;
 
 let sodium;
@@ -69,5 +69,87 @@ describe('SodiumPlus', () => {
         decrypted = await sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(ciphertext2, nonce, randomKey);
         expect(decrypted.toString('hex')).to.be.equals(plaintext.toString('hex'));
         expect(ciphertext.toString('hex')).to.not.equals(ciphertext2.toString('hex'));
+    });
+
+    it('SodiumPlus.crypto_auth', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let key = await sodium.crypto_auth_keygen();
+        let message = 'Science, math, technology, engineering, and compassion for others.';
+        let mac = await sodium.crypto_auth(message, key);
+        assert(await sodium.crypto_auth_verify(message, key, mac) === true);
+    });
+
+    it('SodiumPlus.crypto_box', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+
+        let aliceKeypair = await sodium.crypto_box_keypair();
+        let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
+        let bobKeypair = await sodium.crypto_box_keypair();
+        let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
+        let bobPublic = await sodium.crypto_box_publickey(bobKeypair);
+
+        let nonce = await sodium.randombytes_buf(24);
+
+        let ciphertext = await sodium.crypto_box(plaintext, nonce, aliceSecret, bobPublic);
+        let decrypted = await sodium.crypto_box_open(ciphertext, nonce, bobSecret, alicePublic);
+        expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+    });
+
+    it('SodiumPlus.crypto_box_seal', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+
+        let aliceKeypair = await sodium.crypto_box_keypair();
+        let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
+        assert(aliceSecret instanceof X25519SecretKey);
+        assert(alicePublic instanceof X25519PublicKey);
+
+        let ciphertext = await sodium.crypto_box_seal(plaintext, alicePublic);
+        let decrypted = await sodium.crypto_box_seal_open(ciphertext, alicePublic, aliceSecret);
+        expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+    });
+
+    it('SodiumPlus.crypto_scalarmult', async() => {
+        let aliceKeypair = await sodium.crypto_box_keypair();
+        let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
+        assert(aliceSecret instanceof X25519SecretKey);
+        assert(alicePublic instanceof X25519PublicKey);
+
+        // crypto_scalarmult_base test:
+        let testPublic = await sodium.crypto_scalarmult_base(aliceSecret);
+        expect(testPublic.getBuffer().toString('hex')).to.be.equals(alicePublic.getBuffer().toString('hex'));
+
+        // crypto_scalarmult test:
+        let bobKeypair = await sodium.crypto_box_keypair();
+        let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
+        let bobPublic = await sodium.crypto_box_publickey(bobKeypair);
+
+        expect(alicePublic.getBuffer().toString('hex')).to.be.equals(alicePublic.getBuffer().toString('hex'));
+
+        let ab = await sodium.crypto_scalarmult(aliceSecret, bobPublic);
+        expect(ab.toString('hex')).to.not.equals('0000000000000000000000000000000000000000000000000000000000000000');
+        let ba = await sodium.crypto_scalarmult(bobSecret, alicePublic);
+        expect(ba.toString('hex')).to.not.equals('0000000000000000000000000000000000000000000000000000000000000000');
+        expect(ab.toString('hex')).to.be.equals(ba.toString('hex'));
+    });
+
+    it('SodiumPlus.crypto_sign', async() => {
+        let aliceKeypair = await sodium.crypto_sign_keypair();
+        let aliceSecret = await sodium.crypto_sign_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_sign_publickey(aliceKeypair);
+
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+        let signed = await sodium.crypto_sign(plaintext, aliceSecret);
+        let opened = await sodium.crypto_sign_open(signed, alicePublic);
+        expect(signed.slice(64).toString('hex')).to.be.equals(opened.toString('hex'));
+        expect(opened.toString()).to.be.equals(plaintext);
+
+        let signature = await sodium.crypto_sign_detached(plaintext, aliceSecret);
+        let valid = await sodium.crypto_sign_verify_detached(plaintext, alicePublic, signature);
+        expect(valid).to.be.equals(true);
     });
 });

@@ -1,4 +1,8 @@
 module.exports = {
     CryptographyKey: require('./lib/cryptography-key'),
-    SodiumPlus: require('./lib/sodiumplus')
+    Ed25519PublicKey: require('./lib/keytypes/ed25519pk'),
+    Ed25519SecretKey: require('./lib/keytypes/ed25519sk'),
+    SodiumPlus: require('./lib/sodiumplus'),
+    X25519PublicKey: require('./lib/keytypes/x25519pk'),
+    X25519SecretKey: require('./lib/keytypes/x25519sk')
 };
