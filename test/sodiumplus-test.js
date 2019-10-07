@@ -107,11 +107,33 @@ describe('SodiumPlus', () => {
         assert(aliceSecret instanceof X25519SecretKey);
         assert(alicePublic instanceof X25519PublicKey);
 
-        let testPublic = await sodium.crypto_box_publickey_from_secretkey(aliceSecret);
-        expect(testPublic.getBuffer().toString('hex')).to.be.equals(alicePublic.getBuffer().toString('hex'));
-
         let ciphertext = await sodium.crypto_box_seal(plaintext, alicePublic);
         let decrypted = await sodium.crypto_box_seal_open(ciphertext, alicePublic, aliceSecret);
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+    });
+
+    it('SodiumPlus.crypto_scalarmult', async() => {
+        let aliceKeypair = await sodium.crypto_box_keypair();
+        let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
+        assert(aliceSecret instanceof X25519SecretKey);
+        assert(alicePublic instanceof X25519PublicKey);
+
+        // crypto_scalarmult_base test:
+        let testPublic = await sodium.crypto_scalarmult_base(aliceSecret);
+        expect(testPublic.getBuffer().toString('hex')).to.be.equals(alicePublic.getBuffer().toString('hex'));
+
+        // crypto_scalarmult test:
+        let bobKeypair = await sodium.crypto_box_keypair();
+        let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
+        let bobPublic = await sodium.crypto_box_publickey(bobKeypair);
+
+        expect(alicePublic.getBuffer().toString('hex')).to.be.equals(alicePublic.getBuffer().toString('hex'));
+
+        let ab = await sodium.crypto_scalarmult(aliceSecret, bobPublic);
+        expect(ab.toString('hex')).to.not.equals('0000000000000000000000000000000000000000000000000000000000000000');
+        let ba = await sodium.crypto_scalarmult(bobSecret, alicePublic);
+        expect(ba.toString('hex')).to.not.equals('0000000000000000000000000000000000000000000000000000000000000000');
+        expect(ab.toString('hex')).to.be.equals(ba.toString('hex'));
     });
 });
