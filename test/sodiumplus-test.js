@@ -136,4 +136,20 @@ describe('SodiumPlus', () => {
         expect(ba.toString('hex')).to.not.equals('0000000000000000000000000000000000000000000000000000000000000000');
         expect(ab.toString('hex')).to.be.equals(ba.toString('hex'));
     });
+
+    it('SodiumPlus.crypto_sign', async() => {
+        let aliceKeypair = await sodium.crypto_sign_keypair();
+        let aliceSecret = await sodium.crypto_sign_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_sign_publickey(aliceKeypair);
+
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+        let signed = await sodium.crypto_sign(plaintext, aliceSecret);
+        let opened = await sodium.crypto_sign_open(signed, alicePublic);
+        expect(signed.slice(64).toString('hex')).to.be.equals(opened.toString('hex'));
+        expect(opened.toString()).to.be.equals(plaintext);
+
+        let signature = await sodium.crypto_sign_detached(plaintext, aliceSecret);
+        let valid = await sodium.crypto_sign_verify_detached(plaintext, alicePublic, signature);
+        expect(valid).to.be.equals(true);
+    });
 });
