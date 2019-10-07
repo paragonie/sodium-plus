@@ -14,6 +14,10 @@ Developer-friendly libsodium API.
       is installed, it will be preferred.
    * Otherwise, the default is [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
 * Fully `async`/`await` ready (aside from object constructors).
+* Type-safe API:
+  * Instead of just passing around `Buffer` objects and hoping you got your
+    argument order correct, `sodium-plus` will throw an Error if you provide
+    the wrong key type.
 
 ## Installing
 
