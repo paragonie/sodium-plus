@@ -78,4 +78,22 @@ describe('SodiumPlus', () => {
         let mac = await sodium.crypto_auth(message, key);
         assert(await sodium.crypto_auth_verify(message, key, mac) === true);
     });
+
+    it('SodiumPlus.crypto_box', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+
+        let aliceKeypair = await sodium.crypto_box_keypair();
+        let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_box_secretkey(aliceKeypair);
+        let bobKeypair = await sodium.crypto_box_keypair();
+        let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
+        let bobPublic = await sodium.crypto_box_secretkey(bobKeypair);
+
+        let nonce = await sodium.randombytes_buf(24);
+
+        let ciphertext = await sodium.crypto_box(plaintext, nonce, aliceSecret, bobPublic);
+        let decrypted = await sodium.crypto_box_open(ciphertext, nonce, bobSecret, alicePublic);
+        expect(decrypted.toString()).to.be.equals(plaintext.toString());
+    });
 });
