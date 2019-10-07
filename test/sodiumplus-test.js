@@ -107,6 +107,9 @@ describe('SodiumPlus', () => {
         assert(aliceSecret instanceof X25519SecretKey);
         assert(alicePublic instanceof X25519PublicKey);
 
+        let testPublic = await sodium.crypto_box_publickey_from_secretkey(aliceSecret);
+        expect(testPublic.getBuffer().toString('hex')).to.be.equals(alicePublic.getBuffer().toString('hex'));
+
         let ciphertext = await sodium.crypto_box_seal(plaintext, alicePublic);
         let decrypted = await sodium.crypto_box_seal_open(ciphertext, alicePublic, aliceSecret);
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
