@@ -1,7 +1,7 @@
 const assert = require('assert');
 const { describe, it } = require('mocha');
 const { expect } = require('chai');
-const { CryptographyKey, SodiumPlus } = require('../index');
+const { CryptographyKey, SodiumPlus, X25519PublicKey, X25519SecretKey } = require('../index');
 const VERBOSE = false;
 
 let sodium;
@@ -104,6 +104,8 @@ describe('SodiumPlus', () => {
         let aliceKeypair = await sodium.crypto_box_keypair();
         let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
         let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
+        assert(aliceSecret instanceof X25519SecretKey);
+        assert(alicePublic instanceof X25519PublicKey);
 
         let ciphertext = await sodium.crypto_box_seal(plaintext, alicePublic);
         let decrypted = await sodium.crypto_box_seal_open(ciphertext, alicePublic, aliceSecret);
