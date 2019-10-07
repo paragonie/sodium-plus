@@ -137,6 +137,18 @@ describe('SodiumPlus', () => {
         expect(ab.toString('hex')).to.be.equals(ba.toString('hex'));
     });
 
+    it('SodiumPlus.crypto_secretbox', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+
+        let key = await sodium.crypto_secretbox_keygen();
+        let nonce = await sodium.randombytes_buf(24);
+
+        let ciphertext = await sodium.crypto_secretbox(plaintext, nonce, key);
+        let decrypted = await sodium.crypto_secretbox_open(ciphertext, nonce, key);
+        expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+    });
+
     it('SodiumPlus.crypto_sign', async() => {
         let aliceKeypair = await sodium.crypto_sign_keypair();
         let aliceSecret = await sodium.crypto_sign_secretkey(aliceKeypair);
