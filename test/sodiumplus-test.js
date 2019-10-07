@@ -84,16 +84,16 @@ describe('SodiumPlus', () => {
         let plaintext = 'Science, math, technology, engineering, and compassion for others.';
 
         let aliceKeypair = await sodium.crypto_box_keypair();
-        let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
-        let alicePublic = await sodium.crypto_box_secretkey(aliceKeypair);
+          let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
+          let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
         let bobKeypair = await sodium.crypto_box_keypair();
-        let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
-        let bobPublic = await sodium.crypto_box_secretkey(bobKeypair);
+          let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
+          let bobPublic = await sodium.crypto_box_publickey(bobKeypair);
 
         let nonce = await sodium.randombytes_buf(24);
 
         let ciphertext = await sodium.crypto_box(plaintext, nonce, aliceSecret, bobPublic);
         let decrypted = await sodium.crypto_box_open(ciphertext, nonce, bobSecret, alicePublic);
-        expect(decrypted.toString()).to.be.equals(plaintext.toString());
+        expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
     });
 });
