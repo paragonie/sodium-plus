@@ -41,14 +41,14 @@ const { SodiumPlus } = require('sodium-plus');
     // Select a backend automatically
     let sodium = await SodiumPlus.auto();
 
-    let key = await sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
+    let key = await sodium.crypto_secretbox_keygen();
     let nonce = await sodium.randombytes_buf(24);
     let message = 'This is just a test message';
     // Message can be a string, buffer, array, etc.
 
-    let ciphertext = await sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(message, nonce, key);
+    let ciphertext = await sodium.crypto_secretbox(message, nonce, key);
     console.log(ciphertext);
-    let decrypted = await sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(ciphertext, nonce, key);
+    let decrypted = await sodium.crypto_secretbox_open(ciphertext, nonce, key);
     console.log(decrypted.toString('utf-8'));
 })();
 ```
@@ -56,7 +56,7 @@ const { SodiumPlus } = require('sodium-plus');
 This should produce output similar to below (but with different random-looking bytes):
 
 ``` 
-<Buffer 9f fd 9c f9 b7 06 94 ae a4 46 fb 31 a2 aa 82 e8 8a e4 6f 0d 24 21 87 6e 49 89 09 8b 38 b3 67 a3 a5 46 1c 2c 23 13 c9 e7 fb 64 32>
+<Buffer 00 b7 66 89 3d b4 4d e9 7e 0f 66 91 fd d1 ca fd be bb 7f 00 89 76 5b 48 ec ed 80 cc 87 76 54 1b b5 ea 87 9b e5 19 ee 4c 31 c5 63>
 This is just a test message
 ```
 
