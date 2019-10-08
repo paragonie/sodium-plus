@@ -188,14 +188,6 @@ describe('SodiumPlus', () => {
         expect(hash.toString('hex')).to.be.equals('5e8f01039bc53eb7');
     });
 
-    it('SodiumPlus.memzero', async() => {
-        if (!sodium) sodium = await SodiumPlus.auto();
-        let buf = await sodium.randombytes_buf(16);
-        expect(buf.toString('hex')).to.not.equals('00000000000000000000000000000000');
-        await sodium.sodium_memzero(buf);
-        expect(buf.toString('hex')).to.be.equals('00000000000000000000000000000000');
-    });
-
     it('SodiumPlus.crypto_sign', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let aliceKeypair = await sodium.crypto_sign_keypair();
@@ -211,5 +203,13 @@ describe('SodiumPlus', () => {
         let signature = await sodium.crypto_sign_detached(plaintext, aliceSecret);
         let valid = await sodium.crypto_sign_verify_detached(plaintext, alicePublic, signature);
         expect(valid).to.be.equals(true);
+    });
+
+    it('SodiumPlus.sodium_memzero', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let buf = await sodium.randombytes_buf(16);
+        expect(buf.toString('hex')).to.not.equals('00000000000000000000000000000000');
+        await sodium.sodium_memzero(buf);
+        expect(buf.toString('hex')).to.be.equals('00000000000000000000000000000000');
     });
 });
