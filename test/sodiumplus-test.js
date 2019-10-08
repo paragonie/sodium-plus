@@ -112,6 +112,30 @@ describe('SodiumPlus', () => {
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
     });
 
+    it('SodiumPlus.crypto_generichash', async() => {
+        let message = 'Science, math, technology, engineering, and compassion for others.';
+        let piece1 = message.slice(0, 16);
+        let piece2 = message.slice(16);
+
+        let hash1 = await sodium.crypto_generichash(message);
+        expect(hash1.toString('hex')).to.be.equals('47c1fdbde32b30b9c54dd47cf88ba92d2d05df1265e342c9563ed56aee84ab02');
+
+        let state = await sodium.crypto_generichash_init();
+        await sodium.crypto_generichash_update(state, piece1);
+        await sodium.crypto_generichash_update(state, piece2);
+        let hash2 = await sodium.crypto_generichash_final(state);
+        expect(hash1.toString('hex')).to.be.equals(hash2.toString('hex'));
+
+        let key = await sodium.crypto_generichash_keygen();
+        hash1 = await sodium.crypto_generichash(message, key);
+        state = await sodium.crypto_generichash_init(key);
+        await sodium.crypto_generichash_update(state, piece1);
+        await sodium.crypto_generichash_update(state, piece2);
+        hash2 = await sodium.crypto_generichash_final(state);
+        expect(hash1.toString('hex')).to.be.equals(hash2.toString('hex'));
+
+    });
+
     it('SodiumPlus.crypto_scalarmult', async() => {
         let aliceKeypair = await sodium.crypto_box_keypair();
         let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
