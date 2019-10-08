@@ -173,6 +173,21 @@ describe('SodiumPlus', () => {
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
     });
 
+    it('SodiumPlus.crypto_shorthash', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let key = CryptographyKey.from('808182838485868788898a8b8c8d8e8f', 'hex');
+        let message;
+        let hash;
+
+        message = 'This is short input0';
+        hash = await sodium.crypto_shorthash(message, key);
+        expect(hash.toString('hex')).to.be.equals('ef589fb9ef4196b3');
+
+        message = 'This is short input1';
+        hash = await sodium.crypto_shorthash(message, key);
+        expect(hash.toString('hex')).to.be.equals('5e8f01039bc53eb7');
+    });
+
     it('SodiumPlus.memzero', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let buf = await sodium.randombytes_buf(16);
