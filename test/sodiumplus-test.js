@@ -173,7 +173,16 @@ describe('SodiumPlus', () => {
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
     });
 
+    it('SodiumPlus.memzero', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let buf = await sodium.randombytes_buf(16);
+        expect(buf.toString('hex')).to.not.equals('00000000000000000000000000000000');
+        await sodium.sodium_memzero(buf);
+        expect(buf.toString('hex')).to.be.equals('00000000000000000000000000000000');
+    });
+
     it('SodiumPlus.crypto_sign', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
         let aliceKeypair = await sodium.crypto_sign_keypair();
         let aliceSecret = await sodium.crypto_sign_secretkey(aliceKeypair);
         let alicePublic = await sodium.crypto_sign_publickey(aliceKeypair);
