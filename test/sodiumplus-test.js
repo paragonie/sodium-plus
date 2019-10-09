@@ -136,6 +136,54 @@ describe('SodiumPlus', () => {
 
     });
 
+    it('SodiumPlus.crypto_pwhash', async function() {
+        this.timeout(0);
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let password = 'correct horse battery staple';
+        let salt = Buffer.from('808182838485868788898a8b8c8d8e8f', 'hex');
+        let hashed = await sodium.crypto_pwhash(
+            16,
+            password,
+            salt,
+            sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+            sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+        );
+        expect(hashed.toString('hex')).to.be.equals('720f95400220748a811bca9b8cff5d6e');
+    });
+
+    it('SodiumPlus.crypto_pwhash_str', async function() {
+        this.timeout(0);
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let password = 'correct horse battery staple';
+        let hashed = await sodium.crypto_pwhash_str(
+            password,
+            sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+            sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+        );
+        assert(hashed);
+        assert(await sodium.crypto_pwhash_str_verify(password, hashed));
+
+        let needs;
+        needs = await sodium.crypto_pwhash_str_needs_rehash(
+            hashed,
+            sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+            sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+        );
+        expect(needs).to.be.equals(false);
+        needs = await sodium.crypto_pwhash_str_needs_rehash(
+            hashed,
+            sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE + 1,
+            sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+        );
+        expect(needs).to.be.equals(true);
+        needs = await sodium.crypto_pwhash_str_needs_rehash(
+            hashed,
+            sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+            sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE << 1
+        );
+        expect(needs).to.be.equals(true);
+    });
+
     it('SodiumPlus.crypto_scalarmult', async() => {
         let aliceKeypair = await sodium.crypto_box_keypair();
         let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
