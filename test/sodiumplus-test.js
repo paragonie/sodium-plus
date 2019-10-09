@@ -2,6 +2,7 @@ const assert = require('assert');
 const { describe, it } = require('mocha');
 const { expect } = require('chai');
 const { CryptographyKey, SodiumPlus, X25519PublicKey, X25519SecretKey } = require('../index');
+const Util = require('../lib/util');
 const VERBOSE = false;
 
 let sodium;
@@ -17,6 +18,15 @@ let sodium;
 })();
 
 describe('SodiumPlus', () => {
+    it('SodiumPlus.CONSTANTS', async () => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let dummy = Util.populateConstants({});
+        for (let val in dummy) {
+            expect(sodium.backend[val]).to.be.equals(dummy[val]);
+            expect(sodium[val]).to.be.equals(dummy[val]);
+        }
+    });
+
     it('SodiumPlus.add()', async () => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let foo = Buffer.from('ed000000', 'hex');
