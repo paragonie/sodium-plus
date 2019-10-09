@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "libsodium-wrappers": "github:paragonie/libsodium.js#bigint-fix",
+    "sodium-native": "^2.4.6",
     "typedarray-to-buffer": "^3.1.5"
   },
   "repository": "https://github.com/paragonie/sodium-plus-js",

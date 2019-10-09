@@ -281,6 +281,25 @@ describe('SodiumPlus', () => {
         expect(valid).to.be.equals(true);
     });
 
+    it('SodiumPlus.crypto_sign', async function () {
+        this.timeout(0);
+        if (!sodium) sodium = await SodiumPlus.auto();
+
+        let aliceKeypair = CryptographyKey.from(
+            '411a2c2227d2a799ebae0ed94417d8e8ed1ca9b0a9d5f4cd743cc52d961e94e2' +
+            'da49154c9e700b754199df7974e9fa4ee4b6ebbc71f89d8d8938335ea4a1409d' +
+            'da49154c9e700b754199df7974e9fa4ee4b6ebbc71f89d8d8938335ea4a1409d', 'hex');
+        let aliceSecret = await sodium.crypto_sign_secretkey(aliceKeypair);
+        let alicePublic = await sodium.crypto_sign_publickey(aliceKeypair);
+
+        let ecdhSecret = await sodium.crypto_sign_ed25519_sk_to_curve25519(aliceSecret);
+        expect(ecdhSecret.toString('hex')).to.be
+            .equals('60c783b8d1674b7081b72a105b55872502825d4ec638028152e085b54705ad7e');
+        let ecdhPublic = await sodium.crypto_sign_ed25519_pk_to_curve25519(alicePublic);
+        expect(ecdhPublic.toString('hex')).to.be
+            .equals('5a791d07cfb39060c8e9b641b6a915a3126cd14ddc243a9928c490c8e1f59e7c');
+    });
+
     it('SodiumPlus.sodium_memzero', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let buf = await sodium.randombytes_buf(16);
