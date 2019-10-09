@@ -143,7 +143,25 @@ describe('SodiumPlus', () => {
         await sodium.crypto_generichash_update(state, piece2);
         hash2 = await sodium.crypto_generichash_final(state);
         expect(hash1.toString('hex')).to.be.equals(hash2.toString('hex'));
+    });
 
+    it('SodiumPlus.crypto_kdf', async function() {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let subkey, expected;
+        let key = CryptographyKey.from('808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f', 'hex');
+        let context = 'NaClTest';
+        subkey = await sodium.crypto_kdf_derive_from_key(32, 1, context, key);
+        expected = 'bce6fcf118cac2691bb23975a63dfac02282c1cd5de6ab9febcbb0ec4348181b';
+        expect(subkey.toString('hex')).to.be.equals(expected);
+
+        subkey = await sodium.crypto_kdf_derive_from_key(32, 2, context, key);
+        expected = '877cf1c1a2da9b900c79464acebc3731ed4ebe326a7951911639821d09dc6dda';
+        expect(subkey.toString('hex')).to.be.equals(expected);
+
+        let key2 = await sodium.crypto_kdf_keygen();
+        let subkey2 = await sodium.crypto_kdf_derive_from_key(32, 1, context, key2);
+        expect(subkey2.toString('hex')).to.not.equals(key2.toString('hex'));
+        expect(subkey2.toString('hex')).to.not.equals(subkey.toString('hex'));
     });
 
     it('SodiumPlus.crypto_pwhash', async function() {
