@@ -164,6 +164,24 @@ describe('SodiumPlus', () => {
         expect(subkey2.toString('hex')).to.not.equals(subkey.toString('hex'));
     });
 
+    it('SodiumPlus.crypto_kx', async function() {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let clientKeys = await sodium.crypto_kx_keypair();
+            let clientSecret = await sodium.crypto_box_secretkey(clientKeys);
+            let clientPublic = await sodium.crypto_box_publickey(clientKeys);
+        let seed = 'Unit test static key seed goes here. Nothing too complicated. No randomness needed, really.';
+        let serverKeys = await sodium.crypto_kx_seed_keypair(seed);
+            let serverSecret = await sodium.crypto_box_secretkey(serverKeys);
+            let serverPublic = await sodium.crypto_box_publickey(serverKeys);
+        let clientRx, clientTx, serverRx, serverTx;
+
+        [clientRx, clientTx] = await sodium.crypto_kx_client_session_keys(clientPublic, clientSecret, serverPublic);
+        [serverRx, serverTx] = await sodium.crypto_kx_server_session_keys(serverPublic, serverSecret, clientPublic);
+
+        expect(clientRx.toString('hex')).to.be.equals(serverTx.toString('hex'));
+        expect(clientTx.toString('hex')).to.be.equals(serverRx.toString('hex'));
+    });
+
     it('SodiumPlus.crypto_pwhash', async function() {
         this.timeout(0);
         if (!sodium) sodium = await SodiumPlus.auto();
