@@ -40,6 +40,11 @@ The following classes inherit from `CryptographyKey`:
 
 ## SodiumPlus Methods
 
+This describes the methods in the public API for Sodium-Plus.
+If you're not sure which method to use, please refer to the
+[Libsodium Quick Reference](https://paragonie.com/blog/2017/06/libsodium-quick-reference-quick-comparison-similar-functions-and-which-one-use)
+for guidance.
+
 ### crypto_aead_xchacha20poly1305_ietf_decrypt
 
 Decrypt a message (and optional associated data) with XChaCha20-Poly1305.
