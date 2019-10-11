@@ -361,7 +361,6 @@ let sodium;
     let key = await sodium.crypto_generichash_keygen();
     let hash2 = await sodium.crypto_generichash(message, key, 64);
     let state = await sodium.crypto_generichash_init(key, 64);
-    console.log(state);
 
     await sodium.crypto_generichash_update(state, 'Any message ');
     await sodium.crypto_generichash_update(state, 'can go here');
