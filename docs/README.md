@@ -1,8 +1,6 @@
-# Sodium-Plus
+# Table of Contents
 
-## Table of Contents
-
-* [Contents](#contents)
+* [Table of Contents](#table-of-contents)
 * [Getting Started](#getting-started)
   * [CryptographyKey](#cryptographykey)
 * [SodiumPlus Methods](#sodiumplus-methods)
@@ -11,7 +9,7 @@
     * [crypto_aead_xchacha20poly1305_ietf_encrypt](#crypto_aead_xchacha20poly1305_ietf_encrypt)
     * [crypto_aead_xchacha20poly1305_ietf_keygen](#crypto_aead_xchacha20poly1305_ietf_keygen)
     * [Example for crypto_aead_xchacha20poly1305_ietf_*](#example-for-crypto_aead_xchacha20poly1305_ietf_)
-  * Shared-key Authentication
+  * Shared-key authentication
     * [crypto_auth](#crypto_auth)
     * [crypto_auth_verify](#crypto_auth_verify)
     * [crypto_auth_keygen](#crypto_auth_keygen)
@@ -83,7 +81,7 @@
     * [randombytes_uniform](#randombytes_uniform)
     * [Example for randombytes](#example-for-randombytes)
 
-## Getting Started
+# Getting Started
 
 You always want to use `SodiumPlus` from within an asynchronous function.
 
@@ -97,7 +95,7 @@ async function myFunction() {
 }
 ```
 
-### CryptographyKey
+## CryptographyKey
 
 All cryptographic secrets are contained within a `CryptographyKey` object
 (or one of its derived classes). You can create and access them like so:
@@ -123,12 +121,14 @@ The following classes inherit from `CryptographyKey`:
 * `X25519PublicKey` -- X25519 public key
 * `X25519SecretKey` -- X25519 secret key
 
-## SodiumPlus Methods
+# SodiumPlus Methods
 
 This describes the methods in the public API for Sodium-Plus.
 If you're not sure which method to use, please refer to the
 [Libsodium Quick Reference](https://paragonie.com/blog/2017/06/libsodium-quick-reference-quick-comparison-similar-functions-and-which-one-use)
 for guidance.
+
+## AEAD
 
 ### crypto_aead_xchacha20poly1305_ietf_decrypt
 
@@ -191,6 +191,8 @@ let sodium;
 })();
 ```
 
+## Shared-key authentication
+
 ### crypto_auth
 
 Get an authenticator for a message for a given key.
@@ -233,6 +235,8 @@ let sodium;
     console.log(await sodium.crypto_auth_verify(plaintext, key, mac));
 })();
 ```
+
+## Authenticated public-key encryption
 
 ### crypto_box
 
@@ -330,6 +334,8 @@ let sodium;
 })();
 ```
 
+## Sealed boxes
+
 ### crypto_box_seal
 
 Anonymous public-key encryption. (Message integrity is still assured.)
@@ -374,6 +380,8 @@ let sodium;
     console.log(decrypted.toString());
 })();
 ```
+
+## General-purpose cryptographic hash
 
 ### crypto_generichash
 
@@ -454,6 +462,8 @@ let sodium;
 })();
 ```
 
+## Key derivation
+
 ### crypto_kdf_derive_from_key
 
 Derive a subkey from a master key.
@@ -495,6 +505,8 @@ let sodium;
     });
 })();
 ```
+
+## Key exchange
 
 ### crypto_kx_keypair
 
@@ -587,6 +599,8 @@ let sodium;
 })();
 ```
 
+## Password-based key derivation
+
 ### crypto_pwhash
 
 Derive a cryptography key from a password and salt.
@@ -628,6 +642,8 @@ let sodium;
     console.log(key.getBuffer().toString('hex'));
 })();
 ```
+
+## Password hashing and storage
 
 ### crypto_pwhash_str
 
@@ -700,6 +716,8 @@ let sodium;
 })();
 ```
 
+## Scalar multiplication over Curve25519
+
 ### crypto_scalarmult
 
 Elliptic Curve Diffie-Hellman key exchange over Curve25519.
@@ -745,6 +763,8 @@ let sodium;
     });
 })();
 ```
+
+## Shared-key authenticated encryption
 
 ### crypto_secretbox
 
@@ -805,6 +825,8 @@ let sodium;
 })();
 ```
 
+## Short-input hashing
+
 ### crypto_shorthash
 
 Calculate a fast hash for short inputs.
@@ -840,6 +862,8 @@ let sodium;
     console.log(mapped);
 })();
 ```
+
+## Digital signatures
 
 ### crypto_sign
 
@@ -961,6 +985,8 @@ let sodium;
     console.log(opened.toString());
 })();
 ```
+
+## Randomness
 
 ### randombytes_buf
 
