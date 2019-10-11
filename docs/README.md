@@ -26,9 +26,11 @@ let key = new CryptographyKey(buf);
 
 // If you do this, the internal buffer will not be visible!
 console.log(key);
+// CryptographyKey {}
 
 // You'll need to do this instead:
 console.log(key.getBuffer());
+// <Buffer d9 ff 60 6b ff 96 f6 26 05 53 07 39 ef b5 a5 8b 26 0c 72 9e 1b b7 e4 97 fe 09 de 07 86 8a 0c b6>
 ```
 
 The following classes inherit from `CryptographyKey`:
