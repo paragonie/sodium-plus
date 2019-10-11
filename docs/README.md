@@ -1,5 +1,78 @@
 # Sodium-Plus
 
+* [Getting Started](#getting-started)
+  * [CryptographyKey](#cryptographykey)
+* [SodiumPlus Methods](#sodiumplus-methods)
+  * AEAD (XChaCha20-Poly1305)
+    * [crypto_aead_xchacha20poly1305_ietf_decrypt](#crypto_aead_xchacha20poly1305_ietf_decrypt)
+    * [crypto_aead_xchacha20poly1305_ietf_encrypt](#crypto_aead_xchacha20poly1305_ietf_encrypt)
+    * [crypto_aead_xchacha20poly1305_ietf_keygen](#crypto_aead_xchacha20poly1305_ietf_keygen)
+    * [Example for crypto_aead_xchacha20poly1305_ietf_*](#example-for-crypto_aead_xchacha20poly1305_ietf_)
+  * Shared-key Authentication
+    * [crypto_auth](#crypto_auth)
+    * [crypto_auth_verify](#crypto_auth_verify)
+    * [crypto_auth_keygen](#crypto_auth_keygen)
+    * [Example for crypto_auth](#example-for-crypto_auth)
+  * Authenticated public-key encryption
+    * [crypto_box](#crypto_box)
+    * [crypto_box_open](#crypto_box_open)
+    * [crypto_box_keypair](#crypto_box_keypair)
+    * [crypto_box_keypair_from_secretkey_and_secretkey](#crypto_box_keypair_from_secretkey_and_secretkey)
+    * [crypto_box_publickey](#crypto_box_publickey)
+    * [crypto_box_secretkey](#crypto_box_secretkey)
+    * [crypto_box_publickey_from_secretkey](#crypto_box_publickey_from_secretkey)
+    * [Example for crypto_box](#example-for-crypto_box)
+  * Sealed boxes (anonymous public-key encryption)
+    * [crypto_box_seal](#crypto_box_seal)
+    * [crypto_box_seal_open](#crypto_box_seal_open)
+    * [Example for crypto_box_seal](#example-for-crypto_box_seal)
+  * General-purpose cryptographic hash
+    * [crypto_generichash](#crypto_generichash)
+    * [crypto_generichash_init](#crypto_generichash_init)
+    * [crypto_generichash_update](#crypto_generichash_update)
+    * [crypto_generichash_final](#crypto_generichash_final)
+    * [crypto_generichash_keygen](#crypto_generichash_keygen)
+    * [Example for crypto_generichash](#example-for-crypto_generichash)
+  * Key derivation
+    * [crypto_kdf_derive_from_key](#crypto_kdf_derive_from_key)
+    * [crypto_kdf_keygen](#crypto_kdf_keygen)
+    * [Example for crypto_kdf](#example-for-crypto_kdf)
+  * Key exchange
+    * [crypto_kx_keypair](#crypto_kx_keypair)
+    * [crypto_kx_seed_keypair](#crypto_kx_seed_keypair)
+    * [crypto_kx_client_session_keys](#crypto_kx_client_session_keys)
+    * [crypto_kx_server_session_keys](#crypto_kx_server_session_keys)
+    * [Example for crypto_kx](#example-for-crypto_kx)
+  * Password-based key derivation
+    * [crypto_pwhash](#crypto_pwhash)
+    * [Example for crypto_pwhash](#example-for-crypto_pwhash)
+  * Password hashing and storage
+    * [crypto_pwhash_str](#crypto_pwhash_str)
+    * [crypto_pwhash_str_needs_rehash](#crypto_pwhash_str_needs_rehash)
+    * [crypto_pwhash_str_verify](#crypto_pwhash_str_verify)
+    * [Example for crypto_pwhash_str](#example-for-crypto_pwhash_str)
+  * Scalar multiplication over Curve25519 (advanced)
+    * [crypto_scalarmult](#crypto_scalarmult)
+    * [crypto_scalarmult_base](#crypto_scalarmult_base)
+    * [Example for crypto_scalarmult](#example-for-crypto_scalarmult)
+  * Shared-key authenticated encryption
+    * [crypto_secretbox](#crypto_secretbox)
+    * [crypto_secretbox_open](#crypto_secretbox_open)
+    * [crypto_secretbox_keygen](#crypto_secretbox_keygen)
+    * [Example for crypto_secretbox](#example-for-crypto_secretbox)
+  * Short-input hashing
+    * [crypto_shorthash](#crypto_shorthash)
+    * [crypto_shorthash_keygen](#crypto_shorthash_keygen)
+    * [Example for crypto_shorthash](#example-for-crypto_shorthash)
+  * Digital signatures
+    * [crypto_sign](#crypto_sign)
+    * [crypto_sign_open](#crypto_sign_open)
+    * [crypto_sign_detached](#crypto_sign_detached)
+    * [crypto_sign_verify_detached](#crypto_sign_verify_detached)
+    * [crypto_sign_keypair](#crypto_sign_keypair)
+    * [crypto_sign_publickey](#crypto_sign_publickey)
+    * [crypto_sign_secretkey](#crypto_sign_secretkey)
+
 ## Getting Started
 
 You always want to use `SodiumPlus` from within an asynchronous function.
@@ -136,7 +209,7 @@ Return a `Promise` that resolves to a `boolean`.
 Returns a `CryptographyKey` object containing a key appropriate
 for the `crypto_auth` API.
 
-### Example for crypto_auth_*
+### Example for crypto_auth
 
 ```javascript
 const { SodiumPlus } = require('sodium-plus');
@@ -413,7 +486,7 @@ let sodium;
 })();
 ```
 
-### crypto_kx_seedpair
+### crypto_kx_keypair
 
 This is functionally identical to [`crypto_box_keypair()`](#crypto_box_keypair).
 
