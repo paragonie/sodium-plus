@@ -66,7 +66,7 @@ let sodium;
 
     console.log(ciphertext.toString('hex'));
 
-    let decrypted = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
+    let decrypted = await sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
         ciphertext,
         nonce,
         key
@@ -104,3 +104,17 @@ Return a `Promise` that resolves to a `boolean`.
 Returns a `CryptographyKey` object containing a key appropriate
 for the `crypto_auth` API.
 
+### Example for crypto_auth_*
+
+```javascript
+const { SodiumPlus } = require('sodium-plus');
+let sodium;
+
+(async function () {
+    if (!sodium) sodium = await SodiumPlus.auto();
+    let plaintext = 'Your message goes here';
+    let key = await sodium.crypto_auth_keygen();
+    let mac = await sodium.crypto_auth(plaintext, key);
+    console.log(await sodium.crypto_auth_verify(plaintext, key, mac));
+})();
+```
