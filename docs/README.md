@@ -305,7 +305,7 @@ General-purpose cryptographic hash (powered by BLAKE2).
 
 Returns a `Promise` that resolves to a `Buffer`.
 
-### crypto_auth_keygen
+### crypto_generichash_keygen
 
 Returns a `CryptographyKey` object containing a key appropriate
 for the `crypto_generichash` API.
