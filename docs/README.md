@@ -599,6 +599,7 @@ let sodium;
     );
     console.log(pwhash);
     
+    // Check that we don't need to rotate hashes
     let stale = await sodium.crypto_pwhash_str_needs_rehash(
         pwhash,
         sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
@@ -608,6 +609,7 @@ let sodium;
         console.warn('Password needs to be rehashed');
     }
 
+    // Password validation
     if (await sodium.crypto_pwhash_str_verify(password, pwhash)) {
         console.log("Password valid");
     } else {
