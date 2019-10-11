@@ -27,26 +27,6 @@ describe('SodiumPlus', () => {
         }
     });
 
-    it('SodiumPlus.add()', async () => {
-        if (!sodium) sodium = await SodiumPlus.auto();
-        let foo = Buffer.from('ed000000', 'hex');
-        let bar = Buffer.from('01000000', 'hex');
-        let baz = await sodium.add(foo, bar);
-        expect(baz.toString('hex')).to.be.equals('ee000000');
-
-        bar = Buffer.from('ff000000', 'hex');
-        baz = await sodium.add(baz, bar);
-        expect(baz.toString('hex')).to.be.equals('ed010000');
-
-        foo = Buffer.from('ffffffff', 'hex');
-        bar = Buffer.from('01000000', 'hex');
-        baz = await sodium.add(foo, bar);
-        expect(baz.toString('hex')).to.be.equals('00000000');
-        bar = Buffer.from('02000000', 'hex');
-        baz = await sodium.add(foo, bar);
-        expect(baz.toString('hex')).to.be.equals('01000000');
-    });
-
     it('SodiumPlus.crypto_aead_xchacha20poly1305_ietf_*', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let plaintext = Buffer.from(
@@ -318,11 +298,116 @@ describe('SodiumPlus', () => {
             .equals('5a791d07cfb39060c8e9b641b6a915a3126cd14ddc243a9928c490c8e1f59e7c');
     });
 
+    it('SodiumPlus.randombytes_buf', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let a, b;
+        for (let i = 0; i < 100; i++) {
+            a = await sodium.randombytes_buf(64);
+            b = await sodium.randombytes_buf(64);
+            expect(a.toString('hex')).to.not.equals(b.toString('hex'));
+        }
+    });
+
+    it('SodiumPlus.randombytes_uniform', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let a, b;
+        for (let i = 0; i < 100; i++) {
+            a = await sodium.randombytes_uniform(0x3fffffff);
+            b = await sodium.randombytes_uniform(0x3fffffff);
+            expect(a).to.not.equals(b);
+        }
+    });
+
+    it('SodiumPlus.sodium_add', async () => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let foo = Buffer.from('ed000000', 'hex');
+        let bar = Buffer.from('01000000', 'hex');
+        let baz = await sodium.sodium_add(foo, bar);
+        expect(baz.toString('hex')).to.be.equals('ee000000');
+
+        bar = Buffer.from('ff000000', 'hex');
+        baz = await sodium.sodium_add(baz, bar);
+        expect(baz.toString('hex')).to.be.equals('ed010000');
+
+        foo = Buffer.from('ffffffff', 'hex');
+        bar = Buffer.from('01000000', 'hex');
+        baz = await sodium.sodium_add(foo, bar);
+        expect(baz.toString('hex')).to.be.equals('00000000');
+        bar = Buffer.from('02000000', 'hex');
+        baz = await sodium.sodium_add(foo, bar);
+        expect(baz.toString('hex')).to.be.equals('01000000');
+    });
+
+    it('SodiumPlus.sodium_compare', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let a = Buffer.from('80808080', 'hex');
+        let b = Buffer.from('81808080', 'hex');
+        let c = Buffer.from('80808081', 'hex');
+
+        expect(await sodium.sodium_compare(a, a)).to.be.equals(0);
+        expect(await sodium.sodium_compare(b, b)).to.be.equals(0);
+        expect(await sodium.sodium_compare(c, c)).to.be.equals(0);
+        expect(await sodium.sodium_compare(a, b)).to.be.below(0);
+        expect(await sodium.sodium_compare(b, a)).to.be.above(0);
+        expect(await sodium.sodium_compare(a, c)).to.be.below(0);
+        expect(await sodium.sodium_compare(c, a)).to.be.above(0);
+        expect(await sodium.sodium_compare(b, c)).to.be.below(0);
+        expect(await sodium.sodium_compare(c, b)).to.be.above(0);
+    });
+
+    it('SodiumPlus.sodium_increment', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let a = Buffer.from('80808080', 'hex');
+        let b = Buffer.from('81808080', 'hex');
+        await sodium.sodium_increment(a);
+        expect(await sodium.sodium_compare(b, a)).to.be.equals(0);
+
+        a = Buffer.from('ffffffff', 'hex');
+        b = Buffer.from('00000000', 'hex');
+        await sodium.sodium_increment(a);
+        expect(await sodium.sodium_compare(b, a)).to.be.equals(0);
+    });
+    it('SodiumPlus.sodium_is_zero', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let buf;
+        buf = Buffer.from('00', 'hex');
+        expect(await sodium.sodium_is_zero(buf, 1)).to.be.equals(true);
+        buf = Buffer.from('01', 'hex');
+        expect(await sodium.sodium_is_zero(buf, 1)).to.be.equals(false);
+    });
+
+    it('SodiumPlus.sodium_memcmp', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let a, b, c;
+        a = await sodium.randombytes_buf(32);
+        b = await sodium.randombytes_buf(32);
+        c = await Util.cloneBuffer(b);
+
+        expect(await sodium.sodium_memcmp(a, b)).to.be.equals(false);
+        expect(await sodium.sodium_memcmp(a, c)).to.be.equals(false);
+        expect(await sodium.sodium_memcmp(b, c)).to.be.equals(true);
+        expect(await sodium.sodium_memcmp(c, b)).to.be.equals(true);
+    });
+
     it('SodiumPlus.sodium_memzero', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let buf = await sodium.randombytes_buf(16);
         expect(buf.toString('hex')).to.not.equals('00000000000000000000000000000000');
         await sodium.sodium_memzero(buf);
         expect(buf.toString('hex')).to.be.equals('00000000000000000000000000000000');
+    });
+
+    it('SodiumPlus.sodium_pad', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let buf, size;
+        for (let i = 0; i < 100; i++) {
+            buf = await sodium.randombytes_buf(
+                await sodium.randombytes_uniform(96) + 16
+            );
+            let size = await sodium.randombytes_uniform(96) + 5;
+            let padded = await sodium.sodium_pad(buf, size);
+            let unpadded = await sodium.sodium_unpad(padded, size);
+            expect(unpadded.toString('hex')).to.be.equals(buf.toString('hex'));
+        }
     });
 });
