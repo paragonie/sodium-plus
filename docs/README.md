@@ -14,6 +14,30 @@ async function myFunction() {
 }
 ```
 
+### CryptographyKey
+
+All cryptographic secrets are contained within a `CryptographyKey` object
+(or one of its derived classes). You can create and access them like so:
+
+```javascript
+const { CryptographyKey } = require('sodium-plus');
+let buf = Buffer.alloc(32);
+let key = new CryptographyKey(buf);
+
+// If you do this, the internal buffer will not be visible!
+console.log(key);
+
+// You'll need to do this instead:
+console.log(key.getBuffer());
+```
+
+The following classes inherit from `CryptographyKey`:
+
+* `Ed25519PublicKey` -- Ed25519 public key
+* `Ed25519SecretKey` -- Ed25519 secret key
+* `X25519PublicKey` -- X25519 public key
+* `X25519SecretKey` -- X25519 secret key
+
 ## SodiumPlus Methods
 
 ### crypto_aead_xchacha20poly1305_ietf_decrypt
