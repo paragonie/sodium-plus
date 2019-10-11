@@ -376,6 +376,19 @@ describe('SodiumPlus', () => {
         expect(await sodium.sodium_is_zero(buf, 1)).to.be.equals(false);
     });
 
+    it('SodiumPlus.sodium_memcmp', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let a, b, c;
+        a = await sodium.randombytes_buf(32);
+        b = await sodium.randombytes_buf(32);
+        c = await Util.cloneBuffer(b);
+
+        expect(await sodium.sodium_memcmp(a, b)).to.be.equals(false);
+        expect(await sodium.sodium_memcmp(a, c)).to.be.equals(false);
+        expect(await sodium.sodium_memcmp(b, c)).to.be.equals(true);
+        expect(await sodium.sodium_memcmp(c, b)).to.be.equals(true);
+    });
+
     it('SodiumPlus.sodium_memzero', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let buf = await sodium.randombytes_buf(16);
