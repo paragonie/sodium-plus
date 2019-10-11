@@ -751,7 +751,7 @@ let sodium;
 (async function () {
     if (!sodium) sodium = await SodiumPlus.auto();
     let key = await sodium.crypto_shorthash_keygen();
-    let mapped = [];
+    let mapped = {};
     mapped['foo'] = await sodium.crypto_shorthash('foo', key);
     mapped['bar'] = await sodium.crypto_shorthash('bar', key);
     mapped['baz'] = await sodium.crypto_shorthash('baz', key);
