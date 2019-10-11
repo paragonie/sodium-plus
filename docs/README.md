@@ -468,7 +468,6 @@ Returns a `Promise` that resolves to an array of two `CryptographyKey` objects.
 ### Example for crypto_kx
 
 ```javascript
-
 const { SodiumPlus } = require('sodium-plus');
 let sodium;
 
@@ -503,5 +502,116 @@ let sodium;
             'outgoing': serverOKey.getBuffer().toString('hex')
         }
     });
+})();
+```
+
+### crypto_pwhash
+
+Derive a cryptography key from a password and salt.
+
+**Parameters and their respective types**:
+
+1. `{number}` output length
+2. `{string|Buffer}` password
+3. `{Buffer}` salt (16 bytes)
+4. `{number}` opslimit (recommeded minimum: `2`)
+5. `{number}` memlimit (recommended mimimum: `67108864` a.k.a. 64MiB)
+6. `{number|null}` algorithm (recommended: `this.CRYPTO_PWHASH_ALG_DEFAULT`)
+
+Returns a `Promise` that resolves to a `CryptographyKey`.
+
+### Example for crypto_pwhash
+
+This example is for key derivation. Look [below](#example-for-crypto_pwhash_str)
+for information about password storage/verification.
+
+```javascript
+
+const { SodiumPlus } = require('sodium-plus');
+let sodium;
+
+(async function () {
+    if (!sodium) sodium = await SodiumPlus.auto();
+    
+    let password = 'correct horse battery staple';
+    let salt = await sodium.randombytes_buf(16);
+
+    let key = await sodium.crypto_pwhash(
+        32,
+        password,
+        salt,
+        sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+        sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+    );
+    console.log(key.getBuffer().toString('hex'));
+})();
+```
+
+### crypto_pwhash_str
+
+Get a password hash (in a safe-for-storage format).
+
+**Parameters and their respective types**:
+
+1. `{string|Buffer}` password
+2. `{number}` opslimit (recommeded minimum: `2`)
+3. `{number}` memlimit (recommended mimimum: `67108864` a.k.a. 64MiB)
+
+Returns a `Promise` that resolves to a `string`.
+
+### crypto_pwhash_str_needs_rehash
+
+Does this password need to be rehashed? (i.e. have the algorithm parameters
+we want changed since the hash was generated?)
+
+**Parameters and their respective types**:
+
+1. `{string}` password hash
+2. `{number}` opslimit (recommeded minimum: `2`)
+3. `{number}` memlimit (recommended mimimum: `67108864` a.k.a. 64MiB)
+
+Returns a `Promise` that resolves to a `boolean`.
+
+### crypto_pwhash_str_verify
+
+Verify a password against a known password hash.
+
+1. `{string|Buffer}` password
+2. `{string}` password hash
+
+Returns a `Promise` that resolves to a `boolean`.
+
+### Example for crypto_pwhash_str
+
+```javascript
+const { SodiumPlus } = require('sodium-plus');
+let sodium;
+
+(async function () {
+    if (!sodium) sodium = await SodiumPlus.auto();
+    let password = 'correct horse battery staple';
+    
+    // Generating a password hash
+    let pwhash = await sodium.crypto_pwhash_str(
+        password,
+        sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+        sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+    );
+    console.log(pwhash);
+    
+    let stale = await sodium.crypto_pwhash_str_needs_rehash(
+        pwhash,
+        sodium.CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+        sodium.CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+    );
+    if (stale) {
+        console.warn('Password needs to be rehashed');
+    }
+
+    if (await sodium.crypto_pwhash_str_verify(password, pwhash)) {
+        console.log("Password valid");
+    } else {
+        console.error("Incorrect password");
+    }
 })();
 ```
