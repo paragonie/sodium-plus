@@ -66,7 +66,7 @@ This is just a test message
 
 ## Documentation
 
-The documentation is [available online on Github](/docs)!
+The documentation is [available online on Github](https://github.com/paragonie/sodium-plus/tree/master/docs)!
 
 ## Support Contracts
 
