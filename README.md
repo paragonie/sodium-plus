@@ -3,10 +3,13 @@
 [![Travis CI](https://travis-ci.org/paragonie/sodium-plus.svg?branch=master)](https://travis-ci.org/paragonie/sodium-plus)
 [![npm version](https://img.shields.io/npm/v/sodium-plus.svg)](https://npm.im/sodium-plus)
 
-Developer-friendly libsodium API.
+Sodium-Plus delivers a positive cryptography experience for JavaScript developers.
 
-(Very early work in progress. Not suitable for production use yet.)
- 
+Sodium-Plus brings you all the benefits of using libsodium in your application
+without any of the headaches introduced by the incumbent APIs.
+
+Sodium-Plus is permissively licensed (ISC) and free to use.
+
 ## Features
 
 * Pluggable backend with auto-loader:
@@ -17,7 +20,8 @@ Developer-friendly libsodium API.
 * Type-safe API:
   * Instead of just passing around `Buffer` objects and hoping you got your
     argument order correct, `sodium-plus` will throw an Error if you provide
-    the wrong key type.
+    the wrong key type. This prevents you from accidentally introducing a severe
+    security risk into your application.
 
 ## Installing
 
