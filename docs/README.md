@@ -1,5 +1,8 @@
 # Sodium-Plus
 
+## Table of Contents
+
+* [Contents](#contents)
 * [Getting Started](#getting-started)
   * [CryptographyKey](#cryptographykey)
 * [SodiumPlus Methods](#sodiumplus-methods)
@@ -72,6 +75,13 @@
     * [crypto_sign_keypair](#crypto_sign_keypair)
     * [crypto_sign_publickey](#crypto_sign_publickey)
     * [crypto_sign_secretkey](#crypto_sign_secretkey)
+    * [crypto_sign_ed25519_sk_to_curve25519](#crypto_sign_ed25519_sk_to_curve25519)
+    * [crypto_sign_ed25519_pk_to_curve25519](#crypto_sign_ed25519_pk_to_curve25519)
+    * [Example for crypto_sign](#example-for-crypto_sign)
+  * Randomness
+    * [randombytes_buf](#randombytes_buf)
+    * [randombytes_uniform](#randombytes_uniform)
+    * [Example for randombytes](#example-for-randombytes)
 
 ## Getting Started
 
@@ -902,6 +912,26 @@ Returns a `Promise` that resolves to a `Ed25519PublicKey`.
 
 Returns a `Promise` that resolves to a `Ed25519SecretKey`.
 
+### crypto_sign_ed25519_sk_to_curve25519
+
+Obtain a birationally equivalent X25519 secret key, given an Ed25519 secret key.
+
+**Parameters and their respective types**:
+
+1. `{Ed25519SecretKey}`
+
+Returns a `Promise` that resolves to an `X25519SecretKey`.
+
+### crypto_sign_ed25519_pk_to_curve25519
+
+Obtain a birationally equivalent X25519 public key, given an Ed25519 public key.
+
+**Parameters and their respective types**:
+
+1. `{Ed25519PublicKey}`
+
+Returns a `Promise` that resolves to an `X25519PublicKey`.
+
 ### Example for crypto_sign
 
 ```javascript
@@ -929,5 +959,44 @@ let sodium;
     let signed = await sodium.crypto_sign(message, aliceSecret);
     let opened = await sodium.crypto_sign_open(signed, alicePublic);
     console.log(opened.toString());
+})();
+```
+
+### randombytes_buf
+
+Obtain a buffer filled with random bytes.
+
+**Parameters and their respective types**:
+
+1. `{number}` Size of buffer to return
+
+Returns a `Promise` that resolves to a `Buffer`
+
+### randombytes_uniform
+
+Generate an integer between 0 and upperBound (non-inclusive).
+
+For example, randombytes_uniform(10) returns an integer between 0 and 9.
+
+**Parameters and their respective types**:
+
+1. `{number}` Upper bound
+
+Returns a `Promise` that resolves to a `number`.
+
+### Example for randombytes
+
+```javascript
+const { SodiumPlus } = require('sodium-plus');
+let sodium;
+
+(async function () {
+    if (!sodium) sodium = await SodiumPlus.auto();
+    
+    let someBuf = await sodium.randombytes_buf(32);
+    console.log(someBuf.toString('hex'));
+
+    let someInt = await sodium.randombytes_uniform(65536);
+    console.log(someInt);
 })();
 ```
