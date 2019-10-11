@@ -678,6 +678,8 @@ Returns a `Promise` that resolves to a `Buffer`.
 
 ### crypto_secretbox_open
 
+Shared-key authenticated decryption.
+
 **Parameters and their respective types**:
 
 1. `{string|Buffer}` Ciphertext
