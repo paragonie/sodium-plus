@@ -60,6 +60,10 @@ This should produce output similar to below (but with different random-looking b
 This is just a test message
 ```
 
+## Documentation
+
+The documentation is [available online on Github](/docs)!
+
 ## Support Contracts
 
 If your company uses this library in their products or services, you may be
