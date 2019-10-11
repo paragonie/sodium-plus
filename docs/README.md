@@ -42,10 +42,14 @@ Encrypt a message (and optional associated data) with XChaCha20-Poly1305.
 
 Returns a `Promise` that resolves to a `Buffer`.
 
+### crypto_aead_xchacha20poly1305_ietf_keygen
+
+Returns a `CryptographyKey` object containing a key appropriate
+for the `crypto_aead_xchacha20poly1305_ietf_` API.
+
 ### Example for crypto_aead_xchacha20poly1305_ietf_*
 
 ```javascript
-
 const { SodiumPlus } = require('sodium-plus');
 let sodium;
 
@@ -71,3 +75,32 @@ let sodium;
     console.log(decrypted.toString());
 })();
 ```
+
+### crypto_auth
+
+Get an authenticator for a message for a given key.
+
+**Parameters and their respective types**:
+
+1. `{string|Buffer}` message
+2. `{CryptographyKey}` key
+
+Return a `Promise` that resolves to a `Buffer`.
+
+### crypto_auth_verify
+
+Verify an authenticator for a message for a given key.
+
+**Parameters and their respective types**:
+
+1. `{string|Buffer}` message
+2. `{CryptographyKey}` key
+2. `{Buffer}` mac
+
+Return a `Promise` that resolves to a `boolean`.
+
+### crypto_auth_keygen
+
+Returns a `CryptographyKey` object containing a key appropriate
+for the `crypto_auth` API.
+
