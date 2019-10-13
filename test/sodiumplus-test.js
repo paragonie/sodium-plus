@@ -429,14 +429,14 @@ describe('SodiumPlus', () => {
 
     it('SodiumPlus.sodium_pad', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
-        let buf, size;
+        let buf, size, padded, unpadded;
         for (let i = 0; i < 100; i++) {
             buf = await sodium.randombytes_buf(
                 await sodium.randombytes_uniform(96) + 16
             );
-            let size = await sodium.randombytes_uniform(96) + 5;
-            let padded = await sodium.sodium_pad(buf, size);
-            let unpadded = await sodium.sodium_unpad(padded, size);
+            size = await sodium.randombytes_uniform(96) + 5;
+            padded = await sodium.sodium_pad(buf, size);
+            unpadded = await sodium.sodium_unpad(padded, size);
             expect(unpadded.toString('hex')).to.be.equals(buf.toString('hex'));
         }
     });
