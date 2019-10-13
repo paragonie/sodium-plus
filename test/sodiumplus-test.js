@@ -292,7 +292,7 @@ describe('SodiumPlus', () => {
         expect(valid).to.be.equals(true);
     });
 
-    it('SodiumPlus.crypto_sign', async function () {
+    it('SodiumPlus.crypto_sign_ed25519_to_curve25519', async function () {
         this.timeout(0);
         if (!sodium) sodium = await SodiumPlus.auto();
 
