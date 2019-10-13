@@ -162,6 +162,19 @@ describe('SodiumPlus', () => {
         expect(clientTx.toString('hex')).to.be.equals(serverRx.toString('hex'));
     });
 
+    it('SodiumPlus.crypto_onetimeauth', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let key = await sodium.crypto_onetimeauth_keygen();
+        let plaintext = 'Science, math, technology, engineering, and compassion for others.';
+        let tag = await sodium.crypto_onetimeauth(plaintext, key);
+        assert(await sodium.crypto_onetimeauth_verify(plaintext, key, tag));
+
+        let msg = Buffer.alloc(32, 0);
+        key = CryptographyKey.from('746869732069732033322d62797465206b657920666f7220506f6c7931333035', 'hex');
+        tag = await sodium.crypto_onetimeauth(msg, key);
+        expect(tag.toString('hex')).to.be.equals('49ec78090e481ec6c26b33b91ccc0307');
+    });
+
     it('SodiumPlus.crypto_pwhash', async function() {
         this.timeout(0);
         if (!sodium) sodium = await SodiumPlus.auto();
