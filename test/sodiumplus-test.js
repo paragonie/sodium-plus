@@ -311,6 +311,23 @@ describe('SodiumPlus', () => {
             .equals('5a791d07cfb39060c8e9b641b6a915a3126cd14ddc243a9928c490c8e1f59e7c');
     });
 
+    it('SodiumPlus.crypto_stream', async function () {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let key = CryptographyKey.from('8000000000000000000000000000000000000000000000000000000000000000', 'hex');
+        let iv = Buffer.alloc(24, 0);
+        let output = await sodium.crypto_stream(256, iv, key);
+        let testVector = '93D88C085B8433B1FBAD2221FAD718078D96119F727D27F0547F9F3D29DE1358' +
+                         'F3FE3D9EEACF59E894FA76E6507F567B4A0796DD00D8BFC736344A9906CB1F5D';
+        expect(output.slice(0, 64).toString('hex').toUpperCase()).to.be.equals(testVector);
+        testVector = '17FD2BD86D095016D8367E0DD47D3E4A18DAE7BB24F8B5E3E9F52C4A493BE982' +
+                     'ECA8E89A4DEC78467E31087A1ACDA83754BEFB273AB27EB396EB4957F7166C25';
+        expect(output.slice(192, 256).toString('hex').toUpperCase()).to.be.equals(testVector);
+
+        key = CryptographyKey.from('80808080808080808080808080808080808080808080808080808080808080808080', 'hex');
+        output = await sodium.crypto_stream_xor('Test message', iv, key);
+        expect(output.toString('hex')).to.be.equals('1071d0355cb22c4c4e00303f');
+    });
+
     it('SodiumPlus.randombytes_buf', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let a, b;
