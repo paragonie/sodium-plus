@@ -168,11 +168,13 @@ describe('SodiumPlus', () => {
         let plaintext = 'Science, math, technology, engineering, and compassion for others.';
         let tag = await sodium.crypto_onetimeauth(plaintext, key);
         assert(await sodium.crypto_onetimeauth_verify(plaintext, key, tag));
+        assert((await sodium.crypto_onetimeauth_verify(plaintext + ' extra', key, tag)) === false);
 
         let msg = Buffer.alloc(32, 0);
         key = CryptographyKey.from('746869732069732033322d62797465206b657920666f7220506f6c7931333035', 'hex');
         tag = await sodium.crypto_onetimeauth(msg, key);
         expect(tag.toString('hex')).to.be.equals('49ec78090e481ec6c26b33b91ccc0307');
+        assert(await sodium.crypto_onetimeauth_verify(msg, key, tag));
     });
 
     it('SodiumPlus.crypto_pwhash', async function() {
@@ -201,6 +203,7 @@ describe('SodiumPlus', () => {
         );
         assert(hashed);
         assert(await sodium.crypto_pwhash_str_verify(password, hashed));
+        assert(await sodium.crypto_pwhash_str_verify('incorrect password', hashed) === false);
 
         let needs;
         needs = await sodium.crypto_pwhash_str_needs_rehash(
@@ -290,6 +293,8 @@ describe('SodiumPlus', () => {
         let signature = await sodium.crypto_sign_detached(plaintext, aliceSecret);
         let valid = await sodium.crypto_sign_verify_detached(plaintext, alicePublic, signature);
         expect(valid).to.be.equals(true);
+        let invalid = await sodium.crypto_sign_verify_detached(plaintext + ' extra', alicePublic, signature);
+        expect(invalid).to.be.equals(false);
     });
 
     it('SodiumPlus.crypto_sign_ed25519_to_curve25519', async function () {
