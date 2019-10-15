@@ -12,10 +12,11 @@ Sodium-Plus is permissively licensed (ISC) and free to use.
 
 ## Features
 
-* Pluggable backend with auto-loader:
-   * If [sodium-native](https://github.com/sodium-friends/sodium-native)
-      is installed, it will be preferred.
-   * Otherwise, the default is [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
+* **Cross-platform.**
+* Pluggable backend with an [auto-loader](docs#getting-started):
+  * If [sodium-native](https://github.com/sodium-friends/sodium-native)
+    is installed, it will be preferred.
+  * Otherwise, the default is [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
 * Fully `async`/`await` ready (aside from object constructors).
 * Type-safe API:
   * Instead of just passing around `Buffer` objects and hoping you got your
@@ -33,6 +34,9 @@ npm install sodium-plus
 
 You can optionally install `sodium-native` alongside `sodium-plus` if you
 want better performance.
+
+The default configuration is a bit slower, but has a wider reach
+(e.g. web browsers).
 
 ## Using Sodium-Plus in Your Projects
 
