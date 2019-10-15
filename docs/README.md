@@ -3,7 +3,7 @@
 * [Table of Contents](#table-of-contents) (you are here)
 * [Getting Started](getting-started.md#getting-started)
   * [CryptographyKey](getting-started.md#cryptographykey)
-* [SodiumPlus Methods](SodiumPlus)
+* [SodiumPlus Methods](SodiumPlus#sodiumplus-methods)
   * [AEAD (XChaCha20-Poly1305)](SodiumPlus/AEAD.md#aead)
     * [crypto_aead_xchacha20poly1305_ietf_decrypt](SodiumPlus/AEAD.md#crypto_aead_xchacha20poly1305_ietf_decrypt)
     * [crypto_aead_xchacha20poly1305_ietf_encrypt](SodiumPlus/AEAD.md#crypto_aead_xchacha20poly1305_ietf_encrypt)
