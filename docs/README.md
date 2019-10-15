@@ -164,6 +164,8 @@ for guidance.
 
 ## AEAD
 
+> **See also:** [Libsodium's documentation on its AEAD features](https://download.libsodium.org/doc/secret-key_cryptography/aead/chacha20-poly1305/xchacha20-poly1305_construction).
+
 ### crypto_aead_xchacha20poly1305_ietf_decrypt
 
 Decrypt a message (and optional associated data) with XChaCha20-Poly1305.
@@ -227,6 +229,8 @@ let sodium;
 
 ## Shared-key authentication
 
+> **See also**: [Libsodium's documentation on its shared-key authentication features](https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication).
+
 ### crypto_auth
 
 Get an authenticator for a message for a given key.
@@ -271,6 +275,8 @@ let sodium;
 ```
 
 ## Authenticated public-key encryption
+
+> **See also**: [Libsodium's documentation on its public-key authenticated encryption features](https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption).
 
 ### crypto_box
 
@@ -370,6 +376,8 @@ let sodium;
 
 ## Sealed boxes
 
+> **See also**: [Libsodium's documentation on its sealed boxes features](https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes).
+
 ### crypto_box_seal
 
 Anonymous public-key encryption. (Message integrity is still assured.)
@@ -416,6 +424,8 @@ let sodium;
 ```
 
 ## General-purpose cryptographic hash
+
+> **See also**: [Libsodium's documentation on its generic hashing features](https://download.libsodium.org/doc/hashing/generic_hashing).
 
 ### crypto_generichash
 
@@ -498,6 +508,8 @@ let sodium;
 
 ## Key derivation
 
+> **See also**: [Libsodium's documentation on its key derivation features](https://download.libsodium.org/doc/key_derivation).
+
 ### crypto_kdf_derive_from_key
 
 Derive a subkey from a master key.
@@ -541,6 +553,8 @@ let sodium;
 ```
 
 ## Key exchange
+
+> **See also**: [Libsodium's documentation on its key exchange features](https://download.libsodium.org/doc/key_exchange).
 
 ### crypto_kx_keypair
 
@@ -635,6 +649,8 @@ let sodium;
 
 ## Password-based key derivation
 
+> **See also**: [Libsodium's documentation on Argon2](https://download.libsodium.org/doc/password_hashing/the_argon2i_function).
+
 ### crypto_pwhash
 
 Derive a cryptography key from a password and salt.
@@ -678,6 +694,8 @@ let sodium;
 ```
 
 ## Password hashing and storage
+
+> **See also**: [Libsodium's documentation on its password hashing features](https://download.libsodium.org/doc/password_hashing).
 
 ### crypto_pwhash_str
 
@@ -752,6 +770,8 @@ let sodium;
 
 ## Scalar multiplication over Curve25519
 
+> **See also**: [Libsodium's documentation on its scalar multiplication features](https://download.libsodium.org/doc/advanced/scalar_multiplication).
+
 ### crypto_scalarmult
 
 Elliptic Curve Diffie-Hellman key exchange over Curve25519.
@@ -799,6 +819,8 @@ let sodium;
 ```
 
 ## Shared-key authenticated encryption
+
+> **See also**: [Libsodium's documentation on its shared-key authenticated encryption features](https://download.libsodium.org/doc/secret-key_cryptography/secretbox).
 
 ### crypto_secretbox
 
@@ -861,6 +883,8 @@ let sodium;
 
 ## Short-input hashing
 
+> **See also**: [Libsodium's documentation on its short-input hashing features](https://download.libsodium.org/doc/hashing/short-input_hashing).
+
 ### crypto_shorthash
 
 Calculate a fast hash for short inputs.
@@ -898,6 +922,8 @@ let sodium;
 ```
 
 ## Digital signatures
+
+> **See also**: [Libsodium's documentation on its public-key signature features](https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures).
 
 ### crypto_sign
 
@@ -1021,6 +1047,8 @@ let sodium;
 ```
 
 ## Randomness
+
+> **See also:** [Libsodium's documentation on its random data features](https://download.libsodium.org/doc/generating_random_data).
 
 ### randombytes_buf
 
