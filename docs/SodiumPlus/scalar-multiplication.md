@@ -1,3 +1,7 @@
+## Scalar multiplication over Curve25519
+
+> **See also**: [Libsodium's documentation on its scalar multiplication features](https://download.libsodium.org/doc/advanced/scalar_multiplication).
+
 ### crypto_scalarmult
 
 Elliptic Curve Diffie-Hellman key exchange over Curve25519.
