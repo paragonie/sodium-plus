@@ -95,6 +95,40 @@ async function myFunction() {
 }
 ```
 
+When you use `await SodiumPlus.auto()`, this will automatically load in the best
+backend available for your platform. This is the recommended way to use SodiumPlus.
+
+If you'd rather use a specific backend, you can do the following:
+
+```javascript
+const { SodiumPlus, SodiumUtil, getBackendObject } = require('sodium-plus');
+let sodium;
+ 
+async function myFunction() {
+    if (!sodium) {
+        let backend = getBackendObject('LibsodiumWrappers');
+        SodiumUtil.populateConstants(backend);
+        sodium = new SodiumPlus(backend);
+    }
+
+    // Now you can use sodium.FUNCTION_NAME_HERE()
+}
+```
+
+To discover what backend you're using at runtime, invoke the `getBackendName()`
+method on the `SodiumPlus` object, like so:
+
+
+```javascript
+const { SodiumPlus } = require('sodium-plus');
+let sodium;
+async function whichBackend() {
+    if (!sodium) sodium = await SodiumPlus.auto();
+
+    console.log(sodium.getBackendName());
+}
+```
+
 ## CryptographyKey
 
 All cryptographic secrets are contained within a `CryptographyKey` object
