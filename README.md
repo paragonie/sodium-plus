@@ -1,6 +1,6 @@
 # Sodium-Plus (Na+)
 
-[![Travis CI](https://travis-ci.org/paragonie/sodium-plus.svg?branch=master)](https://travis-ci.org/paragonie/sodium-plus)
+[![Build Status](https://github.com/paragonie/sodium-plus/workflows/CI/badge.svg)](https://github.com/paragonie/sodium-plus/actions?workflow=CI)
 [![npm version](https://img.shields.io/npm/v/sodium-plus.svg)](https://npm.im/sodium-plus)
 
 Sodium-Plus delivers a positive cryptography experience for JavaScript developers.

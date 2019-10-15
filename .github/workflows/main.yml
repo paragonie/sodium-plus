@@ -1,0 +1,40 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+        node: [ '12', '10' ]
+    name: Node ${{ matrix.node }} (${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: install dependencies
+        run: npm install
+      - name: test without sodium-native
+        run: npm test
+      - name: install sodium-native
+        run: npm install --save sodium-native
+      - name: test with sodium-native
+        run: npm test
+
+  build_latest:
+    name: Node latest
+    runs-on: ubuntu-latest
+    container: node:current
+    steps:
+      - uses: actions/checkout@v1
+      - name: install dependencies
+        run: npm install
+      - name: test without sodium-native
+        run: npm test
+      - name: install sodium-native
+        run: npm install --save sodium-native
+      - name: test with sodium-native
+        run: npm test
