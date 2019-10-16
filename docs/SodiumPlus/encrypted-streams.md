@@ -1,6 +1,6 @@
 ## Encrypted Streams
 
-> **See also:** [[Libsodium's documentation on its encrypted streams feature](https://download.libsodium.org/doc/secret-key_cryptography/secretstream)
+> **See also:** [Libsodium's documentation on its encrypted streams feature](https://download.libsodium.org/doc/secret-key_cryptography/secretstream)
 
 ### crypto_secretstream_xchacha20poly1305_init_push()
 
