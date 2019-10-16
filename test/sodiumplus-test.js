@@ -375,6 +375,13 @@ describe('SodiumPlus', () => {
         key = CryptographyKey.from('80808080808080808080808080808080808080808080808080808080808080808080', 'hex');
         output = await sodium.crypto_stream_xor('Test message', iv, key);
         expect(output.toString('hex')).to.be.equals('1071d0355cb22c4c4e00303f');
+
+        key = await sodium.crypto_stream_keygen();
+        iv = await sodium.randombytes_buf(24);
+        let plaintext = 'This is a secret message';
+        let ciphertext = await sodium.crypto_stream_xor(plaintext, iv, key);
+        let decrypted =  await sodium.crypto_stream_xor(ciphertext, iv, key);
+        expect(decrypted.toString()).to.be.equals(plaintext);
     });
 
     it('SodiumPlus.randombytes_buf', async() => {
