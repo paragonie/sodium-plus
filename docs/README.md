@@ -73,7 +73,7 @@
     * [crypto_secretstream_xchacha20poly1305_pull](SodiumPlus/encrypted-streams.md#crypto_secretstream_xchacha20poly1305_pull)
     * [crypto_secretstream_xchacha20poly1305_keygen](SodiumPlus/encrypted-streams.md#crypto_secretstream_xchacha20poly1305_keygen)
     * [crypto_secretstream_xchacha20poly1305_rekey](SodiumPlus/encrypted-streams.md#crypto_secretstream_xchacha20poly1305_rekey)
-    * [Example for [crypto_secretstream_xchacha20poly1305](SodiumPlus/encrypted-streams.md#example-for-crypto_secretstream_xchacha20poly1305)
+    * [Example for crypto_secretstream_xchacha20poly1305](SodiumPlus/encrypted-streams.md#example-for-crypto_secretstream_xchacha20poly1305)
   * [Short-input hashing](SodiumPlus/short-input-hashing.md)
     * [crypto_shorthash](SodiumPlus/short-input-hashing.md#crypto_shorthash)
     * [crypto_shorthash_keygen](SodiumPlus/short-input-hashing.md#crypto_shorthash_keygen)

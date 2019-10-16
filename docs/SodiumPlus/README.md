@@ -74,7 +74,7 @@ for guidance.
   * [crypto_secretstream_xchacha20poly1305_pull](encrypted-streams.md#crypto_secretstream_xchacha20poly1305_pull)
   * [crypto_secretstream_xchacha20poly1305_keygen](encrypted-streams.md#crypto_secretstream_xchacha20poly1305_keygen)
   * [crypto_secretstream_xchacha20poly1305_rekey](encrypted-streams.md#crypto_secretstream_xchacha20poly1305_rekey)
-  * [Example for [crypto_secretstream_xchacha20poly1305](encrypted-streams.md#example-for-crypto_secretstream_xchacha20poly1305)
+  * [Example for crypto_secretstream_xchacha20poly1305](encrypted-streams.md#example-for-crypto_secretstream_xchacha20poly1305)
 * [Short-input hashing](short-input-hashing.md)
   * [crypto_shorthash](short-input-hashing.md#crypto_shorthash)
   * [crypto_shorthash_keygen](short-input-hashing.md#crypto_shorthash_keygen)
