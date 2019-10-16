@@ -202,6 +202,8 @@
 
 ### crypto_generichash
 
+> [Moved](SodiumPlus/general-purpose-cryptographic-hash.md#crypto_generichash)
+
 ### crypto_generichash_keygen
 
 > [Moved](SodiumPlus/general-purpose-cryptographic-hash.md#crypto_generichash_keygen)
