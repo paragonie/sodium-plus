@@ -36,10 +36,15 @@
   },
   "repository": "https://github.com/paragonie/sodium-plus-js",
   "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts"
+  ],
   "scripts": {
     "test": "mocha"
   },
   "devDependencies": {
+    "@types/node": "^12.11.1",
     "assert": "^1.5.0",
     "chai": "^4.2.0",
     "mocha": "^6.2.1"
