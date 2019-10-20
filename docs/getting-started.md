@@ -71,3 +71,30 @@ The following classes inherit from `CryptographyKey`:
 * `Ed25519SecretKey` -- Ed25519 secret key
 * `X25519PublicKey` -- X25519 public key
 * `X25519SecretKey` -- X25519 secret key
+
+## Sodium-Plus in the Browser
+
+First, download [sodium-plus.min.js](../dist) (or find it on a CDN you trust).
+
+Next, include the following script tags in your web page:
+
+```html5
+<script src="sodium-plus.min.js"></script>
+<script>
+(async function() {
+    if (!window.sodium) window.sodium = await SodiumPlus.auto();
+
+    // You can now use 
+
+    // Some example code to ensure it's running
+    let random = await sodium.randombytes_buf(32);
+    let hash = await sodium.crypto_generichash('hello world');
+    console.log({
+        'random': random.toString('hex'),
+        'hash': hash.toString('hex')
+    });
+})();
+</script>
+``` 
+
+You can then use the `sodium` API as documented.

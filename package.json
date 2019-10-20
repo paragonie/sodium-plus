@@ -1,6 +1,6 @@
 {
   "name": "sodium-plus",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The Sodium Cryptography Library",
   "author": "Paragon Initiative Enterprises, LLC",
   "license": "ISC",
@@ -29,7 +29,8 @@
     "sodium-native": "^2.4.6"
   },
   "dependencies": {
-    "libsodium-wrappers": "jedisct1/libsodium.js#fac7a0e8cd760d7a93fd2ca6a80cbe2810cc3db6",
+    "buffer": "^5.4.3",
+    "libsodium-wrappers": "^0.7.6",
     "poly1305-js": "^0.4.2",
     "typedarray-to-buffer": "^3.1.5",
     "xsalsa20": "^1.0.2"
@@ -46,7 +47,9 @@
   "devDependencies": {
     "@types/node": "^12.11.1",
     "assert": "^1.5.0",
+    "browserify": "^16.5.0",
     "chai": "^4.2.0",
-    "mocha": "^6.2.1"
+    "mocha": "^6.2.1",
+    "tinyify": "^2.5.1"
   }
 }
