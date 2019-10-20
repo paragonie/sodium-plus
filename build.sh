@@ -10,5 +10,5 @@ if [[ $ret -ne 0 ]]; then
   exit "${ret}"
 fi
 
-browserify index.js > dist/sodium-plus.js
-browserify index.js -p tinyify > dist/sodium-plus.min.js
+browserify browser.js > dist/sodium-plus.js
+browserify browser.js -p tinyify > dist/sodium-plus.min.js
