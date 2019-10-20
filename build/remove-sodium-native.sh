@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
+basedir=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+path="${basedir}/pre-build.patch"
 
-git apply --check pre-build.patch
+git apply --check "${path}"
 ret=$?
 if [[ $ret -ne 0 ]]; then
-  echo "Patch is unsafe."
   exit 1
 fi
-git apply pre-build.patch
+git apply "${path}"
 ret=$?
 exit $ret
