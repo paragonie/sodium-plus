@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "buffer": "^5.4.3",
-    "libsodium-wrappers": "jedisct1/libsodium.js#fac7a0e8cd760d7a93fd2ca6a80cbe2810cc3db6",
+    "libsodium-wrappers": "^0.7.6",
     "poly1305-js": "^0.4.2",
     "typedarray-to-buffer": "^3.1.5",
     "xsalsa20": "^1.0.2"
