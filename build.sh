@@ -6,7 +6,7 @@ path="${basedir}/build/remove-sodium-native.sh"
 ret=$(bash "${path}")
 if [[ $ret -ne 0 ]]; then
   echo "Exiting..."
-  exit $ret
+  exit "${ret}"
 fi
 
 browserify index.js > dist/sodium-plus.js

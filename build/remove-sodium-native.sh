@@ -5,7 +5,7 @@ path="${basedir}/pre-build.patch"
 git apply --check "${path}"
 ret=$?
 if [[ $ret -ne 0 ]]; then
-  exit 1
+  exit "${ret}"
 fi
 git apply "${path}"
 ret=$?
