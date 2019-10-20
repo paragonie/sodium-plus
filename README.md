@@ -13,7 +13,8 @@ Sodium-Plus is permissively licensed (ISC) and free to use.
 ## Features
 
 * **Cross-platform.**
-* Pluggable backend with an [auto-loader](docs#getting-started):
+  * Yes, this includes [in the browser](docs/getting-started.md#sodium-plus-in-the-browser).
+* Pluggable backend with an [auto-loader](docs/getting-started.md):
   * If [sodium-native](https://github.com/sodium-friends/sodium-native)
     is installed, it will be preferred.
   * Otherwise, the default is [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
@@ -26,6 +27,8 @@ Sodium-Plus is permissively licensed (ISC) and free to use.
 
 ## Installing
 
+### Installing as a Node.js Module
+
 With NPM:
 
 ```terminal
@@ -37,6 +40,11 @@ want better performance.
 
 The default configuration is a bit slower, but has a wider reach
 (e.g. web browsers).
+
+### Installing in a Web Page
+
+See [this section of the documentation](docs/getting-started.md#sodium-plus-in-the-browser)
+for getting started with Sodium-Plus in a web browser.
 
 ## Using Sodium-Plus in Your Projects
 
