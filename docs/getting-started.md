@@ -84,9 +84,9 @@ Next, include the following script tags in your web page:
 (async function() {
     if (!window.sodium) window.sodium = await SodiumPlus.auto();
 
-    // You can now use 
+    // You can now use the sodium object here.
 
-    // Some example code to ensure it's running
+    // Just some example code to ensure it's running:
     let random = await sodium.randombytes_buf(32);
     let hash = await sodium.crypto_generichash('hello world');
     console.log({
