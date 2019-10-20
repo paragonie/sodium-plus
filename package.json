@@ -39,7 +39,11 @@
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
-    "index.d.ts"
+    "build",
+    "build.sh",
+    "index.d.ts",
+    "index.js",
+    "lib/"
   ],
   "scripts": {
     "test": "mocha"
