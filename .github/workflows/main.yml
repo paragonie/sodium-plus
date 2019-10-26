@@ -27,7 +27,7 @@ jobs:
   build_latest:
     name: Node latest
     runs-on: ubuntu-latest
-    container: node:current
+    container: node:latest
     steps:
       - uses: actions/checkout@v1
       - name: install dependencies
