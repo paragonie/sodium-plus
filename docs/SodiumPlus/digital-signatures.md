@@ -56,6 +56,16 @@ Returns a `Promise` that resolves to a `CryptographyKey` containing a 96-byte
 `Buffer`. The first 64 bytes are your Ed25519 secret key, the latter 32 are your
 Ed25519 public key.
 
+### crypto_sign_seed_keypair
+
+**Parameters and their respective types**:
+
+1. `{Buffer}` 32 byte seed
+
+Returns a `Promise` that resolves to a `CryptographyKey` containing a 96-byte
+`Buffer`. The first 64 bytes are your Ed25519 secret key, the latter 32 are your
+Ed25519 public key.
+
 ### crypto_sign_publickey
 
 **Parameters and their respective types**:

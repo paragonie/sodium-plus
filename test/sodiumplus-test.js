@@ -322,6 +322,17 @@ describe('SodiumPlus', () => {
         expect(hash.toString('hex')).to.be.equals('5e8f01039bc53eb7');
     });
 
+    it('SodiumPlus.crypto_sign_seed_keypair', async() => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let aliceKeypair = await sodium.crypto_sign_seed_keypair(
+            await sodium.crypto_generichash('sodium-plus')
+        );
+        let alicePublic = await sodium.crypto_sign_publickey(aliceKeypair);
+        expect(alicePublic.getBuffer().toString('hex')).to.be.equals(
+            '292288efba3a33275d216f2e4d9014d330f3b2852d6b767de15e43839096d6e8'
+        );
+    });
+
     it('SodiumPlus.crypto_sign', async() => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let aliceKeypair = await sodium.crypto_sign_keypair();
