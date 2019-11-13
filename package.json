@@ -1,6 +1,6 @@
 {
   "name": "sodium-plus",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "The Sodium Cryptography Library",
   "author": "Paragon Initiative Enterprises, LLC",
   "license": "ISC",
@@ -49,11 +49,11 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "@types/node": "^12.11.1",
+    "@types/node": "^12.12.7",
     "assert": "^1.5.0",
     "browserify": "^16.5.0",
     "chai": "^4.2.0",
-    "mocha": "^6.2.1",
-    "tinyify": "^2.5.1"
+    "mocha": "^6.2.2",
+    "tinyify": "^2.5.2"
   }
 }
