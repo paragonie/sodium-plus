@@ -358,6 +358,7 @@ declare namespace Module {
     ): Promise<boolean>;
     crypto_sign_secretkey(keypair: CryptographyKey): Promise<Ed25519SecretKey>;
     crypto_sign_publickey(keypair: CryptographyKey): Promise<Ed25519PublicKey>;
+    crypto_sign_seed_keypair(seed: Buffer): Promise<CryptographyKey>;
     crypto_sign_keypair(): Promise<CryptographyKey>;
 
     crypto_sign_ed25519_sk_to_curve25519(
