@@ -612,6 +612,20 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
     }
 
     /**
+     * @param {Buffer} seed
+     * @return {Promise<CryptographyKey>}
+     */
+    async crypto_sign_seed_keypair(seed) {
+        let obj = this.sodium.crypto_sign_seed_keypair(seed);
+        return new CryptographyKey(
+            Buffer.concat([
+                await Util.toBuffer(obj.privateKey),
+                await Util.toBuffer(obj.publicKey)
+            ])
+        );
+    }
+
+    /**
      * @param {Ed25519SecretKey} sk
      * @return {Promise<Buffer>}
      */
@@ -1227,8 +1241,10 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<boolean>}
      */
     async crypto_pwhash_str_verify(password, hash) {
+        let allocated = Buffer.alloc(128, 0);
+        (await Util.toBuffer(hash)).copy(allocated, 0, 0);
         return this.sodium.crypto_pwhash_str_verify(
-            await Util.toBuffer(hash),
+            allocated,
             await Util.toBuffer(password)
         );
     }
@@ -1240,8 +1256,10 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<boolean>}
      */
     async crypto_pwhash_str_needs_rehash(hash, opslimit, memlimit) {
+        let allocated = Buffer.alloc(128, 0);
+        (await Util.toBuffer(hash)).copy(allocated, 0, 0);
         return this.sodium.crypto_pwhash_str_needs_rehash(
-            await Util.toBuffer(hash),
+            allocated,
             opslimit,
             memlimit
         );
@@ -1452,6 +1470,19 @@ module.exports = class SodiumNativeBackend extends Backend {
         let sK = Buffer.alloc(64, 0);
         let pK = Buffer.alloc(32, 0);
         this.sodium.crypto_sign_keypair(pK, sK);
+        return new CryptographyKey(
+            Buffer.concat([sK, pK])
+        );
+    }
+
+    /**
+     * @param {Buffer} seed
+     * @return {Promise<CryptographyKey>}
+     */
+    async crypto_sign_seed_keypair(seed) {
+        let sK = Buffer.alloc(64, 0);
+        let pK = Buffer.alloc(32, 0);
+        this.sodium.crypto_sign_seed_keypair(pK, sK, seed);
         return new CryptographyKey(
             Buffer.concat([sK, pK])
         );
@@ -1693,6 +1724,7 @@ module.exports = class CryptographyKey {
 
 }).call(this,require("buffer").Buffer)
 },{"buffer":74,"buffer/":17}],7:[function(require,module,exports){
+(function (Buffer){
 const CryptographyKey = require('../cryptography-key');
 
 class Ed25519PublicKey extends CryptographyKey {
@@ -1704,6 +1736,12 @@ class Ed25519PublicKey extends CryptographyKey {
         super(buf);
         this.keyType = 'ed25519';
         this.publicKey = true;
+    }
+    /**
+     * @return {Ed25519PublicKey}
+     */
+    static from() {
+        return new Ed25519PublicKey(Buffer.from(...arguments));
     }
 
     isEd25519Key() {
@@ -1717,7 +1755,9 @@ class Ed25519PublicKey extends CryptographyKey {
 
 module.exports = Ed25519PublicKey;
 
-},{"../cryptography-key":6}],8:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../cryptography-key":6,"buffer":74}],8:[function(require,module,exports){
+(function (Buffer){
 const CryptographyKey = require('../cryptography-key');
 
 class Ed25519SecretKey extends CryptographyKey {
@@ -1729,6 +1769,14 @@ class Ed25519SecretKey extends CryptographyKey {
         this.keyType = 'ed25519';
         this.publicKey = false;
     }
+
+    /**
+     * @return {Ed25519SecretKey}
+     */
+    static from() {
+        return new Ed25519SecretKey(Buffer.from(...arguments));
+    }
+
     isEd25519Key() {
         return true;
     }
@@ -1739,7 +1787,9 @@ class Ed25519SecretKey extends CryptographyKey {
 }
 
 module.exports = Ed25519SecretKey;
-},{"../cryptography-key":6}],9:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../cryptography-key":6,"buffer":74}],9:[function(require,module,exports){
+(function (Buffer){
 const CryptographyKey = require('../cryptography-key');
 
 class X25519PublicKey extends CryptographyKey {
@@ -1751,6 +1801,14 @@ class X25519PublicKey extends CryptographyKey {
         this.keyType = 'x25519';
         this.publicKey = true;
     }
+
+    /**
+     * @return {X25519PublicKey}
+     */
+    static from() {
+        return new X25519PublicKey(Buffer.from(...arguments));
+    }
+
     isX25519Key() {
         return true;
     }
@@ -1762,7 +1820,9 @@ class X25519PublicKey extends CryptographyKey {
 
 module.exports = X25519PublicKey;
 
-},{"../cryptography-key":6}],10:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../cryptography-key":6,"buffer":74}],10:[function(require,module,exports){
+(function (Buffer){
 const CryptographyKey = require('../cryptography-key');
 
 class X25519SecretKey extends CryptographyKey {
@@ -1773,6 +1833,13 @@ class X25519SecretKey extends CryptographyKey {
         super(buf);
         this.keyType = 'x25519';
         this.publicKey = false;
+    }
+
+    /**
+     * @return {X25519SecretKey}
+     */
+    static from() {
+        return new X25519SecretKey(Buffer.from(...arguments));
     }
 
     isX25519Key() {
@@ -1786,7 +1853,8 @@ class X25519SecretKey extends CryptographyKey {
 
 module.exports = X25519SecretKey;
 
-},{"../cryptography-key":6}],11:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../cryptography-key":6,"buffer":74}],11:[function(require,module,exports){
 (function (Buffer){
 const crypto = require('crypto');
 const Poly1305 = require('poly1305-js');
@@ -2797,6 +2865,26 @@ class SodiumPlus {
     async crypto_sign_keypair() {
         await this.ensureLoaded();
         return this.backend.crypto_sign_keypair();
+    }
+
+    /**
+     * Generate an Ed25519 keypair object from a seed.
+     *
+     * @param {Buffer} seed
+     * @return {Promise<CryptographyKey>}
+     */
+    async crypto_sign_seed_keypair(seed) {
+        await this.ensureLoaded();
+        if (seed instanceof CryptographyKey) {
+            seed = seed.getBuffer();
+        }
+        if (!Buffer.isBuffer(seed)) {
+            throw new TypeError('Seed must be a buffer.');
+        }
+        if (seed.length !== 32) {
+            throw new SodiumError(`Seed must be 32 bytes long; got ${seed.length}`);
+        }
+        return this.backend.crypto_sign_seed_keypair(seed);
     }
 
     /**
@@ -7124,6 +7212,9 @@ module.exports = XSalsa20
 
 XSalsa20.NONCEBYTES = 24
 XSalsa20.KEYBYTES = 32
+
+XSalsa20.core_hsalsa20 = core_hsalsa20
+XSalsa20.SIGMA = SIGMA
 
 function XSalsa20 (nonce, key) {
   if (!(this instanceof XSalsa20)) return new XSalsa20(nonce, key)
