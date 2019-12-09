@@ -1,6 +1,6 @@
 {
   "name": "sodium-plus",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "The Sodium Cryptography Library",
   "author": "Paragon Initiative Enterprises, LLC",
   "license": "ISC",
@@ -33,7 +33,7 @@
     "libsodium-wrappers": "^0.7.6",
     "poly1305-js": "^0.4.2",
     "typedarray-to-buffer": "^3.1.5",
-    "xsalsa20": "^1.0.2"
+    "xsalsa20": "^1.1.0"
   },
   "repository": "https://github.com/paragonie/sodium-plus-js",
   "main": "index.js",
