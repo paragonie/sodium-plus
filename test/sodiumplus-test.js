@@ -415,6 +415,13 @@ describe('SodiumPlus', () => {
         }
     });
 
+    it('SodiumPlus.sodium_bin2hex', async () => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let buf = await sodium.randombytes_buf(32);
+
+        expect(await sodium.sodium_bin2hex(buf)).to.be.equals(buf.toString('hex'));
+    });
+
     it('SodiumPlus.sodium_add', async () => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let foo = Buffer.from('ed000000', 'hex');
@@ -450,6 +457,15 @@ describe('SodiumPlus', () => {
         expect(await sodium.sodium_compare(c, a)).to.be.above(0);
         expect(await sodium.sodium_compare(b, c)).to.be.below(0);
         expect(await sodium.sodium_compare(c, b)).to.be.above(0);
+    });
+
+    it('SodiumPlus.sodium_hex2bin', async () => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        let buf = await sodium.randombytes_buf(32);
+        let hex = buf.toString('hex');
+        let bin = await sodium.sodium_hex2bin(hex);
+        expect(Buffer.isBuffer(bin)).to.be.equals(true);
+        expect(bin.toString('base64')).to.be.equals(buf.toString('base64'));
     });
 
     it('SodiumPlus.sodium_increment', async() => {
