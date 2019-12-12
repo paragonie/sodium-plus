@@ -384,7 +384,9 @@ declare namespace Module {
     randombytes_buf(num: number): Promise<Buffer>;
     randombytes_uniform(upperBound: number): Promise<number>;
     sodium_add(val: Buffer, addv: Buffer): Promise<Buffer>;
+    sodium_bin2hex(encoded: Buffer): Promise<string>;
     sodium_compare(b1: Buffer, b2: Buffer): Promise<number>;
+    sodium_hex2bin(encoded: Buffer|string): Promise<Buffer>;
     sodium_increment(buf: Buffer): Promise<Buffer>;
     sodium_is_zero(buf: Buffer, len: number): Promise<Buffer>;
     sodium_memcmp(b1: Buffer, b2: Buffer): Promise<boolean>;
