@@ -797,12 +797,28 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
     }
 
     /**
+     * @param {Buffer} buf
+     * @return {Promise<string>}
+     */
+    async sodium_bin2hex(buf) {
+        return this.sodium.to_hex(buf);
+    }
+
+    /**
      * @param {Buffer} b1
      * @param {Buffer} b2
      * @return {Promise<number>}
      */
     async sodium_compare(b1, b2) {
         return this.sodium.compare(b1, b2);
+    }
+
+    /**
+     * @param {Buffer|string} encoded
+     * @return {Promise<Buffer>}
+     */
+    async sodium_hex2bin(encoded) {
+        return Buffer.from(this.sodium.from_hex(encoded));
     }
 
     /**
@@ -1571,12 +1587,72 @@ module.exports = class SodiumNativeBackend extends Backend {
     }
 
     /**
+     * @param {Buffer} input
+     * @return {Promise<string>}
+     */
+    async sodium_bin2hex(input) {
+        let str = "", b, c, x;
+        for (let i = 0; i < input.length; i++) {
+            c = input[i] & 0xf;
+            b = input[i] >>> 4;
+            x =
+                ((87 + c + (((c - 10) >> 8) & ~38)) << 8) |
+                (87 + b + (((b - 10) >> 8) & ~38));
+            str += String.fromCharCode(x & 0xff) + String.fromCharCode(x >>> 8);
+        }
+        return str;
+    }
+
+    /**
      * @param {Buffer} b1
      * @param {Buffer} b2
      * @return {Promise<number>}
      */
     async sodium_compare(b1, b2) {
         return this.sodium.sodium_compare(b1, b2);
+    }
+
+    /**
+     * @param {Buffer|string} hex
+     * @param {string|null} ignore
+     * @return {Promise<Buffer>}
+     */
+    async sodium_hex2bin(hex, ignore = null) {
+        let bin_pos = 0,
+            hex_pos = 0,
+            c = 0,
+            c_acc = 0,
+            c_alpha0 = 0,
+            c_alpha = 0,
+            c_num0 = 0,
+            c_num = 0,
+            c_val = 0,
+            state = 0;
+        let bin = Buffer.alloc(hex.length >> 1, 0);
+
+        while (hex_pos < hex.length) {
+            c = hex.charCodeAt(hex_pos);
+            c_num = c ^ 48;
+            c_num0 = (c_num - 10) >> 8;
+            c_alpha = (c & ~32) - 55;
+            c_alpha0 = ((c_alpha - 10) ^ (c_alpha - 16)) >> 8;
+            if ((c_num0 | c_alpha0) === 0) {
+                if (ignore && state === 0 && ignore.indexOf(c) >= 0) {
+                    hex_pos++;
+                    continue;
+                }
+                break;
+            }
+            c_val = (c_num0 & c_num) | (c_alpha0 & c_alpha);
+            if (state === 0) {
+                c_acc = c_val * 16;
+            } else {
+                bin[bin_pos++] = c_acc | c_val;
+            }
+            state = ~state;
+            hex_pos++;
+        }
+        return bin;
     }
 
     /**
@@ -2035,9 +2111,9 @@ class SodiumPlus {
             throw new TypeError('Argument 3 must be an instance of CryptographyKey');
         }
         return await this.backend.crypto_aead_xchacha20poly1305_ietf_decrypt(
-            ciphertext,
-            assocData,
-            nonce,
+            await Util.toBuffer(ciphertext),
+            assocData.length > 0 ? await Util.toBuffer(assocData) : null,
+            await Util.toBuffer(nonce),
             key
         );
     }
@@ -2065,9 +2141,9 @@ class SodiumPlus {
         }
 
         return await this.backend.crypto_aead_xchacha20poly1305_ietf_encrypt(
-            plaintext,
-            assocData.length > 0 ? assocData : null,
-            nonce,
+            await Util.toBuffer(plaintext),
+            assocData.length > 0 ? await Util.toBuffer(assocData) : null,
+            await Util.toBuffer(nonce),
             key
         );
     }
@@ -2096,7 +2172,10 @@ class SodiumPlus {
             throw new TypeError('Argument 2 must be an instance of CryptographyKey');
         }
         await this.ensureLoaded();
-        return await this.backend.crypto_auth(message, key);
+        return await this.backend.crypto_auth(
+            await Util.toBuffer(message),
+            key
+        );
     }
 
     /**
@@ -2120,7 +2199,11 @@ class SodiumPlus {
             throw new TypeError('Argument 2 must be an instance of CryptographyKey');
         }
         await this.ensureLoaded();
-        return await this.backend.crypto_auth_verify(mac, message, key);
+        return await this.backend.crypto_auth_verify(
+            await Util.toBuffer(mac),
+            await Util.toBuffer(message),
+            key
+        );
     }
 
     /**
@@ -2140,12 +2223,13 @@ class SodiumPlus {
         if (!(theirPublicKey instanceof X25519PublicKey)) {
             throw new TypeError('Argument 4 must be an instance of CryptographyKey');
         }
-        if (!Buffer.isBuffer(nonce) || nonce.length !== 24) {
+        nonce = await Util.toBuffer(nonce);
+        if (nonce.length !== 24) {
             throw new SodiumError('Nonce must be a buffer of exactly 24 bytes');
         }
         return this.backend.crypto_box(
-            plaintext,
-            nonce,
+            await Util.toBuffer(plaintext),
+            await Util.toBuffer(nonce),
             myPrivateKey,
             theirPublicKey
         );
@@ -2168,10 +2252,12 @@ class SodiumPlus {
         if (!(theirPublicKey instanceof X25519PublicKey)) {
             throw new TypeError('Argument 4 must be an instance of CryptographyKey');
         }
-        if (!Buffer.isBuffer(ciphertext) || ciphertext.length < 16) {
+        ciphertext = await Util.toBuffer(ciphertext);
+        if (ciphertext.length < 16) {
             throw new SodiumError('Ciphertext must be a buffer of at least 16 bytes');
         }
-        if (!Buffer.isBuffer(nonce) || nonce.length !== 24) {
+        nonce = await Util.toBuffer(nonce);
+        if (nonce.length !== 24) {
             throw new SodiumError('Nonce must be a buffer of exactly 24 bytes');
         }
         return this.backend.crypto_box_open(
@@ -2285,7 +2371,11 @@ class SodiumPlus {
         if (!(secretKey instanceof X25519SecretKey)) {
             throw new TypeError('Argument 3 must be an instance of X25519SecretKey');
         }
-        return await this.backend.crypto_box_seal_open(ciphertext, publicKey, secretKey);
+        return await this.backend.crypto_box_seal_open(
+            await Util.toBuffer(ciphertext),
+            publicKey,
+            secretKey
+        );
     }
 
     /**
@@ -2470,7 +2560,7 @@ class SodiumPlus {
         if (!(key instanceof CryptographyKey)) {
             throw new TypeError('Argument 2 must be an instance of CryptographyKey');
         }
-        return await this.backend.crypto_onetimeauth(message, key);
+        return await this.backend.crypto_onetimeauth(await Util.toBuffer(message), key);
     }
 
     /**
@@ -2483,7 +2573,11 @@ class SodiumPlus {
         if (!(key instanceof CryptographyKey)) {
             throw new TypeError('Argument 2 must be an instance of CryptographyKey');
         }
-        return await this.backend.crypto_onetimeauth_verify(message, key, tag);
+        return await this.backend.crypto_onetimeauth_verify(
+            await Util.toBuffer(message),
+            key,
+            await Util.toBuffer(tag)
+        );
     }
 
     /**
@@ -2512,7 +2606,14 @@ class SodiumPlus {
             algorithm = this.CRYPTO_PWHASH_ALG_DEFAULT;
         }
         return new CryptographyKey(
-            await this.backend.crypto_pwhash(length, password, salt, opslimit, memlimit, algorithm)
+            await this.backend.crypto_pwhash(
+                length,
+                await Util.toBuffer(password),
+                await Util.toBuffer(salt),
+                opslimit,
+                memlimit,
+                algorithm
+            )
         );
     }
 
@@ -2601,7 +2702,8 @@ class SodiumPlus {
         if (key.isEd25519Key() || key.isX25519Key()) {
             throw new TypeError('Argument 3 must not be an asymmetric key');
         }
-        if (!Buffer.isBuffer(nonce) || nonce.length !== 24) {
+        nonce = await Util.toBuffer(nonce);
+        if (nonce.length !== 24) {
             throw new SodiumError('Nonce must be a buffer of exactly 24 bytes');
         }
 
@@ -2625,10 +2727,12 @@ class SodiumPlus {
         if (key.isEd25519Key() || key.isX25519Key()) {
             throw new TypeError('Argument 3 must not be an asymmetric key');
         }
-        if (!Buffer.isBuffer(ciphertext) || ciphertext.length < 16) {
+        ciphertext = await Util.toBuffer(ciphertext);
+        if (ciphertext.length < 16) {
             throw new SodiumError('Ciphertext must be a buffer of at least 16 bytes');
         }
-        if (!Buffer.isBuffer(nonce) || nonce.length !== 24) {
+        nonce = await Util.toBuffer(nonce);
+        if (nonce.length !== 24) {
             throw new SodiumError('Nonce must be a buffer of exactly 24 bytes');
         }
         return await this.backend.crypto_secretbox_open(
@@ -2675,9 +2779,7 @@ class SodiumPlus {
      */
     async crypto_secretstream_xchacha20poly1305_init_pull(key, header) {
         await this.ensureLoaded();
-        if (!Buffer.isBuffer(header)) {
-            throw new TypeError('Header must be a buffer');
-        }
+        header = await Util.toBuffer(header);
         if (header.length !== 24) {
             throw new SodiumError('crypto_secretstream headers must be 24 bytes long');
         }
@@ -2751,7 +2853,7 @@ class SodiumPlus {
      */
     async crypto_shorthash(message, key) {
         await this.ensureLoaded();
-        return await this.backend.crypto_shorthash(message, key);
+        return await this.backend.crypto_shorthash(await Util.toBuffer(message), key);
     }
 
     /**
@@ -2878,9 +2980,7 @@ class SodiumPlus {
         if (seed instanceof CryptographyKey) {
             seed = seed.getBuffer();
         }
-        if (!Buffer.isBuffer(seed)) {
-            throw new TypeError('Seed must be a buffer.');
-        }
+        seed = await Util.toBuffer(seed);
         if (seed.length !== 32) {
             throw new SodiumError(`Seed must be 32 bytes long; got ${seed.length}`);
         }
@@ -2992,6 +3092,17 @@ class SodiumPlus {
     }
 
     /**
+     * Convert to hex.
+     *
+     * @param {Buffer} decoded
+     * @return {Promise<Buffer>}
+     */
+    async sodium_bin2hex(decoded) {
+        await this.ensureLoaded();
+        return this.backend.sodium_bin2hex(decoded);
+    }
+
+    /**
      * Compare two buffers in constant time.
      *
      * Returns -1 if b1 is less than b2.
@@ -3005,6 +3116,16 @@ class SodiumPlus {
     async sodium_compare(b1, b2) {
         await this.ensureLoaded();
         return this.backend.sodium_compare(b1, b2);
+    }
+    /**
+     * Convert to hex.
+     *
+     * @param {Buffer|string} encoded
+     * @return {Promise<string>}
+     */
+    async sodium_hex2bin(encoded) {
+        await this.ensureLoaded();
+        return this.backend.sodium_hex2bin(encoded);
     }
 
     /**
