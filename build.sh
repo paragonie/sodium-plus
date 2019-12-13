@@ -12,3 +12,6 @@ fi
 
 browserify browser.js > dist/sodium-plus.js
 browserify browser.js -p tinyify > dist/sodium-plus.min.js
+
+# Once browserify finishes, rollback changes that removed sodium-native.
+git checkout -- lib/*
