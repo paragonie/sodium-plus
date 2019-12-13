@@ -94,3 +94,6 @@ for guidance.
   * [randombytes_buf](randomness.md#randombytes_buf)
   * [randombytes_uniform](randomness.md#randombytes_uniform)
   * [Example for randombytes](randomness.md#example-for-randombytes)
+* [Utilities](utilities.md)
+  * [sodium_bin2hex](utilities.md#sodium_bin2hex)
+  * [sodium_hex2bin](utilities.md#sodium_bin2hex)

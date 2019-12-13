@@ -94,3 +94,6 @@
     * [randombytes_buf](SodiumPlus/randomness.md#randombytes_buf)
     * [randombytes_uniform](SodiumPlus/randomness.md#randombytes_uniform)
     * [Example for randombytes](SodiumPlus/randomness.md#example-for-randombytes)
+  * [Utilities](SodiumPlus/utilities.md)
+    * [sodium_bin2hex](SodiumPlus/utilities.md#sodium_bin2hex)
+    * [sodium_hex2bin](SodiumPlus/utilities.md#sodium_bin2hex)
