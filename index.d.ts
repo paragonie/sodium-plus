@@ -123,18 +123,22 @@ declare namespace Module {
   export class Ed25519PublicKey extends CryptographyKey {
     readonly keyType: "ed25519";
     readonly publicKey: true;
+    static from(...args: Parameters<typeof Buffer.from>): Ed25519PublicKey;
   }
   export class Ed25519SecretKey extends CryptographyKey {
     readonly keyType: "ed25519";
     readonly publicKey: false;
+    static from(...args: Parameters<typeof Buffer.from>): Ed25519SecretKey;
   }
   export class X25519PublicKey extends CryptographyKey {
     readonly keyType: "x25519";
     readonly publicKey: true;
+    static from(...args: Parameters<typeof Buffer.from>): X25519PublicKey;
   }
   export class X25519SecretKey extends CryptographyKey {
     readonly keyType: "x25519";
     readonly publicKey: false;
+    static from(...args: Parameters<typeof Buffer.from>): X25519SecretKey;
   }
 
   export class SodiumError extends Error {}
