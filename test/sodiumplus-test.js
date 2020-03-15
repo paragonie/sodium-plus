@@ -383,7 +383,7 @@ describe('SodiumPlus', () => {
                      'ECA8E89A4DEC78467E31087A1ACDA83754BEFB273AB27EB396EB4957F7166C25';
         expect(output.slice(192, 256).toString('hex').toUpperCase()).to.be.equals(testVector);
 
-        key = CryptographyKey.from('80808080808080808080808080808080808080808080808080808080808080808080', 'hex');
+        key = CryptographyKey.from('8080808080808080808080808080808080808080808080808080808080808080', 'hex');
         output = await sodium.crypto_stream_xor('Test message', iv, key);
         expect(output.toString('hex')).to.be.equals('1071d0355cb22c4c4e00303f');
 
