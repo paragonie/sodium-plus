@@ -26,10 +26,10 @@
     "poly1305"
   ],
   "peerDependencies": {
-    "sodium-native": "^2.4.6"
+    "sodium-native": "^3.0.0"
   },
   "dependencies": {
-    "buffer": "^5.4.3",
+    "buffer": "^5.5.0",
     "libsodium-wrappers": "^0.7.6",
     "poly1305-js": "^0.4.2",
     "typedarray-to-buffer": "^3.1.5",
@@ -49,11 +49,11 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "@types/node": "^12.12.17",
+    "@types/node": "^13.9.1",
     "assert": "^2.0.0",
     "browserify": "^16.5.0",
     "chai": "^4.2.0",
-    "mocha": "^6.2.2",
+    "mocha": "^7.1.0",
     "tinyify": "^2.5.2"
   }
 }
