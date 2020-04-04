@@ -10,8 +10,12 @@ if [[ $ret -ne 0 ]]; then
   exit "${ret}"
 fi
 
+echo "Building..."
 browserify browser.js > dist/sodium-plus.js
+echo "Minifying..."
 browserify browser.js -p tinyify > dist/sodium-plus.min.js
+echo "Build complete! Resetting..."
 
 # Once browserify finishes, rollback changes that removed sodium-native.
 git checkout -- lib/*
+echo "Done!"

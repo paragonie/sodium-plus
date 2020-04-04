@@ -1,10 +1,11 @@
 diff --git a/lib/backend/sodiumnative.js b/lib/backend/sodiumnative.js
-index 6b725d2..504e46a 100644
+index a592b10..dbfd32a 100644
 --- a/lib/backend/sodiumnative.js
 +++ b/lib/backend/sodiumnative.js
-@@ -1,11 +1,5 @@
+@@ -1,12 +1,5 @@
  let loaded = false;
 -let _sodium;
+-/* istanbul ignore next */
 -try {
 -    _sodium = require('sodium-native');
 -    loaded = true;
@@ -16,10 +17,10 @@ index 6b725d2..504e46a 100644
  const CryptographyKey = require('../cryptography-key');
  const SodiumError = require('../sodium-error');
 diff --git a/lib/sodiumplus.js b/lib/sodiumplus.js
-index 4e3d33c..e80543d 100644
+index a592b10..dbfd32a 100644
 --- a/lib/sodiumplus.js
 +++ b/lib/sodiumplus.js
-@@ -4,7 +4,6 @@ const Ed25519SecretKey = require('./keytypes/ed25519sk');
+@@ -4,7 +4,6 @@
  const Ed25519PublicKey = require('./keytypes/ed25519pk');
  const LibsodiumWrappersBackend = require('./backend/libsodium-wrappers');
  const SodiumError = require('./sodium-error');
@@ -27,7 +28,7 @@ index 4e3d33c..e80543d 100644
  const X25519PublicKey = require('./keytypes/x25519pk');
  const X25519SecretKey = require('./keytypes/x25519sk');
  const Util = require('./util');
-@@ -38,7 +37,7 @@ class SodiumPlus {
+@@ -41,7 +40,7 @@
       * @return {boolean}
       */
      isSodiumNative() {
@@ -36,7 +37,7 @@ index 4e3d33c..e80543d 100644
      }
  
      /**
-@@ -57,15 +56,7 @@ class SodiumPlus {
+@@ -60,16 +59,7 @@
       * @return {Promise<SodiumPlus>}
       */
      static async auto() {
@@ -46,6 +47,7 @@ index 4e3d33c..e80543d 100644
 -        } catch (e) {
 -            backend = await LibsodiumWrappersBackend.init();
 -        }
+-        /* istanbul ignore if */
 -        if (!backend) {
 -            backend = await LibsodiumWrappersBackend.init();
 -        }
