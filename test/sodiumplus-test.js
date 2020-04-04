@@ -1,4 +1,5 @@
 const assert = require('assert');
+const expectError = require('./async-helper');
 const fsp = require('fs').promises;
 const path = require('path');
 const { describe, it } = require('mocha');
@@ -20,6 +21,14 @@ let sodium;
 })();
 
 describe('SodiumPlus', () => {
+    it('ensureLoaded', async () => {
+        if (!sodium) sodium = await SodiumPlus.auto();
+        await sodium.ensureLoaded();
+        expect('string').to.be.equal(typeof sodium.getBackendName());
+        expect('boolean').to.be.equal(typeof sodium.isSodiumNative());
+        expect('boolean').to.be.equal(typeof sodium.isLibsodiumWrappers());
+    });
+
     it('index.js', async () => {
         const indexFile = require('../index');
         expect(typeof indexFile.getBackendObject()).to.be.equal('function');
@@ -71,6 +80,24 @@ describe('SodiumPlus', () => {
         decrypted = await sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(ciphertext2, nonce, randomKey);
         expect(decrypted.toString('hex')).to.be.equals(plaintext.toString('hex'));
         expect(ciphertext.toString('hex')).to.not.equals(ciphertext2.toString('hex'));
+
+        await expectError(
+            sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(plaintext, nonce.slice(1), randomKey),
+            'Argument 2 must be 24 bytes'
+        );
+        await expectError(
+            sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(plaintext, nonce, Buffer.alloc(32)),
+            'Argument 3 must be an instance of CryptographyKey'
+        );
+
+        await expectError(
+            sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, nonce.slice(1), randomKey),
+            'Argument 2 must be 24 bytes'
+        );
+        await expectError(
+            sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, nonce, Buffer.alloc(32)),
+            'Argument 3 must be an instance of CryptographyKey'
+        );
     });
 
     it('SodiumPlus.crypto_auth', async() => {
@@ -79,6 +106,15 @@ describe('SodiumPlus', () => {
         let message = 'Science, math, technology, engineering, and compassion for others.';
         let mac = await sodium.crypto_auth(message, key);
         assert(await sodium.crypto_auth_verify(message, key, mac) === true);
+
+        await expectError(
+            sodium.crypto_auth(message, Buffer.alloc(32)),
+            'Argument 2 must be an instance of CryptographyKey'
+        );
+        await expectError(
+            sodium.crypto_auth_verify(message, Buffer.alloc(32), mac),
+            'Argument 2 must be an instance of CryptographyKey'
+        );
     });
 
     it('SodiumPlus.crypto_box', async() => {
@@ -88,6 +124,7 @@ describe('SodiumPlus', () => {
         let aliceKeypair = await sodium.crypto_box_keypair();
         let aliceSecret = await sodium.crypto_box_secretkey(aliceKeypair);
         let alicePublic = await sodium.crypto_box_publickey(aliceKeypair);
+
         let bobKeypair = await sodium.crypto_box_keypair();
         let bobSecret = await sodium.crypto_box_secretkey(bobKeypair);
         let bobPublic = await sodium.crypto_box_publickey(bobKeypair);
@@ -97,6 +134,60 @@ describe('SodiumPlus', () => {
         let ciphertext = await sodium.crypto_box(plaintext, nonce, aliceSecret, bobPublic);
         let decrypted = await sodium.crypto_box_open(ciphertext, nonce, bobSecret, alicePublic);
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+
+        let derived = await sodium.crypto_box_publickey_from_secretkey(aliceSecret);
+        expect(alicePublic.getBuffer().toString('hex'))
+            .to.be.equal(derived.getBuffer().toString('hex'));
+
+        /* Unhappy path: */
+        await expectError(
+            sodium.crypto_box(plaintext, nonce, alicePublic, bobPublic),
+            'Argument 3 must be an instance of X25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_box(plaintext, nonce, bobSecret, aliceSecret),
+            'Argument 4 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_box(plaintext, nonce.slice(1), bobSecret, alicePublic),
+            'Nonce must be a buffer of exactly 24 bytes'
+        );
+        await expectError(
+            sodium.crypto_box_open(ciphertext, nonce, alicePublic, bobPublic),
+            'Argument 3 must be an instance of X25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_box_open(ciphertext, nonce, bobSecret, aliceSecret),
+            'Argument 4 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_box_open(ciphertext.slice(0, 14), nonce, bobSecret, alicePublic),
+            'Ciphertext must be a buffer of at least 16 bytes'
+        );
+        await expectError(
+            sodium.crypto_box_open(ciphertext, nonce.slice(1), bobSecret, alicePublic),
+            'Nonce must be a buffer of exactly 24 bytes'
+        );
+        await expectError(
+            sodium.crypto_box_keypair_from_secretkey_and_publickey(alicePublic, alicePublic),
+            'Argument 1 must be an instance of X25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_box_keypair_from_secretkey_and_publickey(aliceSecret, aliceSecret),
+            'Argument 2 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_box_secretkey(derived),
+            'Keypair must be 64 bytes'
+        );
+        await expectError(
+            sodium.crypto_box_publickey(derived),
+            'Keypair must be 64 bytes'
+        );
+        await expectError(
+            sodium.crypto_box_publickey_from_secretkey(derived),
+            'Argument 1 must be an instance of X25519SecretKey'
+        );
     });
 
     it('SodiumPlus.crypto_box_seal', async() => {
@@ -112,6 +203,19 @@ describe('SodiumPlus', () => {
         let ciphertext = await sodium.crypto_box_seal(plaintext, alicePublic);
         let decrypted = await sodium.crypto_box_seal_open(ciphertext, alicePublic, aliceSecret);
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+
+        await expectError(
+            sodium.crypto_box_seal(plaintext, aliceSecret),
+            'Argument 2 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_box_seal_open(plaintext, aliceSecret, aliceSecret),
+            'Argument 2 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_box_seal_open(plaintext, alicePublic, alicePublic),
+            'Argument 3 must be an instance of X25519SecretKey'
+        );
     });
 
     it('SodiumPlus.crypto_generichash', async() => {
@@ -154,6 +258,15 @@ describe('SodiumPlus', () => {
         let subkey2 = await sodium.crypto_kdf_derive_from_key(32, 1, context, key2);
         expect(subkey2.toString('hex')).to.not.equals(key2.toString('hex'));
         expect(subkey2.toString('hex')).to.not.equals(subkey.toString('hex'));
+
+        await expectError(
+            sodium.crypto_kdf_derive_from_key(-32, 1, context, key2),
+            'Length must be a positive integer.'
+        );
+        await expectError(
+            sodium.crypto_kdf_derive_from_key(32, -1, context, key2),
+            'Key ID must be an unsigned integer'
+        );
     });
 
     it('SodiumPlus.crypto_kx', async function() {
@@ -172,6 +285,32 @@ describe('SodiumPlus', () => {
 
         expect(clientRx.toString('hex')).to.be.equals(serverTx.toString('hex'));
         expect(clientTx.toString('hex')).to.be.equals(serverRx.toString('hex'));
+
+        await expectError(
+            sodium.crypto_kx_client_session_keys(clientSecret, clientSecret, serverPublic),
+            'Argument 1 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_kx_client_session_keys(clientPublic, clientPublic, serverPublic),
+            'Argument 2 must be an instance of X25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_kx_client_session_keys(clientPublic, clientSecret, serverSecret),
+            'Argument 3 must be an instance of X25519PublicKey'
+        );
+
+        await expectError(
+            sodium.crypto_kx_server_session_keys(serverSecret, serverSecret, clientPublic),
+            'Argument 1 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_kx_server_session_keys(serverPublic, serverPublic, clientPublic),
+            'Argument 2 must be an instance of X25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_kx_server_session_keys(serverPublic, serverSecret, clientSecret),
+            'Argument 3 must be an instance of X25519PublicKey'
+        );
     });
 
     it('SodiumPlus.crypto_onetimeauth', async() => {
@@ -187,6 +326,16 @@ describe('SodiumPlus', () => {
         tag = await sodium.crypto_onetimeauth(msg, key);
         expect(tag.toString('hex')).to.be.equals('49ec78090e481ec6c26b33b91ccc0307');
         assert(await sodium.crypto_onetimeauth_verify(msg, key, tag));
+
+        await expectError(
+            sodium.crypto_onetimeauth(msg, Buffer.alloc(32)),
+            'Argument 2 must be an instance of CryptographyKey'
+        );
+
+        await expectError(
+            sodium.crypto_onetimeauth_verify(msg, Buffer.alloc(32), tag),
+            'Argument 2 must be an instance of CryptographyKey'
+        );
     });
 
     it('SodiumPlus.crypto_scalarmult', async() => {
@@ -212,6 +361,19 @@ describe('SodiumPlus', () => {
         let ba = await sodium.crypto_scalarmult(bobSecret, alicePublic);
         expect(ba.toString('hex')).to.not.equals('0000000000000000000000000000000000000000000000000000000000000000');
         expect(ab.toString('hex')).to.be.equals(ba.toString('hex'));
+
+        await expectError(
+            sodium.crypto_scalarmult(alicePublic, bobPublic),
+            'Argument 1 must be an instance of X25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_scalarmult(aliceSecret, bobSecret),
+            'Argument 2 must be an instance of X25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_scalarmult_base(alicePublic),
+            'Argument 1 must be an instance of X25519SecretKey'
+        );
     });
 
     it('SodiumPlus.crypto_secretbox', async() => {
@@ -224,6 +386,29 @@ describe('SodiumPlus', () => {
         let ciphertext = await sodium.crypto_secretbox(plaintext, nonce, key);
         let decrypted = await sodium.crypto_secretbox_open(ciphertext, nonce, key);
         expect(decrypted.toString('hex')).to.be.equals(Buffer.from(plaintext).toString('hex'));
+
+        // Unhappy path:
+        let ed25519key = await sodium.crypto_sign_secretkey(await sodium.crypto_sign_keypair());
+        await expectError(
+            sodium.crypto_secretbox(ciphertext.slice(0, 14), nonce, ed25519key),
+            'Argument 3 must not be an asymmetric key'
+        );
+        await expectError(
+            sodium.crypto_secretbox(ciphertext, nonce.slice(1), key),
+            'Nonce must be a buffer of exactly 24 bytes'
+        );
+        await expectError(
+            sodium.crypto_secretbox_open(ciphertext.slice(0, 14), nonce, ed25519key),
+            'Argument 3 must not be an asymmetric key'
+        );
+        await expectError(
+            sodium.crypto_secretbox_open(ciphertext.slice(0, 14), nonce, key),
+            'Ciphertext must be a buffer of at least 16 bytes'
+        );
+        await expectError(
+            sodium.crypto_secretbox_open(ciphertext, nonce.slice(1), key),
+            'Nonce must be a buffer of exactly 24 bytes'
+        );
     });
 
     it('SodiumPlus.crypto_secretstream_xchacha20poly1305', async() => {
@@ -233,6 +418,29 @@ describe('SodiumPlus', () => {
         let pushState, pullState, header;
         [pushState, header] = await sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
         pullState = await sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, header);
+
+        await expectError(
+            sodium.crypto_secretstream_xchacha20poly1305_init_push(Buffer.alloc(31)),
+            'Key must be an instance of CryptographyKey'
+        );
+        await expectError(
+            sodium.crypto_secretstream_xchacha20poly1305_init_pull(Buffer.alloc(31), header),
+            'Key must be an instance of CryptographyKey'
+        );
+
+        let invalidKey = new CryptographyKey(Buffer.alloc(31));
+        await expectError(
+            sodium.crypto_secretstream_xchacha20poly1305_init_push(invalidKey),
+            'crypto_secretstream keys must be 32 bytes long'
+        );
+        await expectError(
+            sodium.crypto_secretstream_xchacha20poly1305_init_pull(invalidKey, header),
+            'crypto_secretstream keys must be 32 bytes long'
+        );
+        await expectError(
+            sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, header.slice(1)),
+            'crypto_secretstream headers must be 24 bytes long'
+        );
 
         // Get a test input from the text file.
         let longText = await fsp.readFile(path.join(__dirname, 'longtext.md'));
@@ -266,6 +474,7 @@ describe('SodiumPlus', () => {
             decrypted = Buffer.concat([decrypted, chunk]);
         }
         expect(decrypted.toString('hex')).to.be.equals(longText.toString('hex'));
+        await sodium.crypto_secretstream_xchacha20poly1305_rekey(pushState);
     });
 
     it('SodiumPlus.crypto_shorthash', async() => {
@@ -281,6 +490,9 @@ describe('SodiumPlus', () => {
         message = 'This is short input1';
         hash = await sodium.crypto_shorthash(message, key);
         expect(hash.toString('hex')).to.be.equals('5e8f01039bc53eb7');
+
+        let random = await sodium.crypto_shorthash_keygen();
+        expect(sodium.CRYPTO_SHORTHASH_KEYBYTES).to.be.equal(random.getLength());
     });
 
     it('SodiumPlus.crypto_sign_seed_keypair', async() => {
@@ -291,6 +503,25 @@ describe('SodiumPlus', () => {
         let alicePublic = await sodium.crypto_sign_publickey(aliceKeypair);
         expect(alicePublic.getBuffer().toString('hex')).to.be.equals(
             '292288efba3a33275d216f2e4d9014d330f3b2852d6b767de15e43839096d6e8'
+        );
+        await expectError(
+            sodium.crypto_sign_seed_keypair(Buffer.alloc(31)),
+            'Seed must be 32 bytes long; got 31'
+        );
+        // Should not throw:
+        await sodium.crypto_sign_seed_keypair(
+            new CryptographyKey(await sodium.crypto_generichash('sodium-plus'))
+        );
+    });
+
+    it('SodiumPlus.crypto_sign_{secret,public}key', async() => {
+        await expectError(
+            sodium.crypto_sign_secretkey(new CryptographyKey(Buffer.alloc(16))),
+            'Keypair must be 96 bytes'
+        );
+        await expectError(
+            sodium.crypto_sign_publickey(new CryptographyKey(Buffer.alloc(16))),
+            'Keypair must be 96 bytes'
         );
     });
 
@@ -311,6 +542,22 @@ describe('SodiumPlus', () => {
         expect(valid).to.be.equals(true);
         let invalid = await sodium.crypto_sign_verify_detached(plaintext + ' extra', alicePublic, signature);
         expect(invalid).to.be.equals(false);
+        await expectError(
+            sodium.crypto_sign(plaintext, alicePublic),
+            'Argument 2 must be an instance of Ed25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_sign_open(signed, aliceSecret),
+            'Argument 2 must be an instance of Ed25519PublicKey'
+        );
+        await expectError(
+            sodium.crypto_sign_detached(plaintext, alicePublic),
+            'Argument 2 must be an instance of Ed25519SecretKey'
+        );
+        await expectError(
+            sodium.crypto_sign_verify_detached(plaintext, aliceSecret, signature),
+            'Argument 2 must be an instance of Ed25519PublicKey'
+        );
     });
 
     it('SodiumPlus.crypto_sign_ed25519_to_curve25519', async function () {
