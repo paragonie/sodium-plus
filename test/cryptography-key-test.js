@@ -1,5 +1,5 @@
 const assert = require('assert');
-const crypto = require('crypto')
+const crypto = require('crypto');
 const { describe, it } = require('mocha');
 const { expect } = require('chai');
 const {
@@ -13,10 +13,23 @@ const {
 let sodium;
 describe('CryptographyKey', () => {
     it('Internal buffer is hidden from stack traces and iterators', async () => {
-        let bytes = crypto.randomBytes(32);
+        let bytes = await crypto.randomBytes(32);
         let key = new CryptographyKey(bytes);
         assert(Object.keys(key).length === 0, 'There should be no keys when you dump an object!');
         expect(bytes.toString('hex')).to.be.equals(key.getBuffer().toString('hex'));
+        expect(bytes.toString('hex')).to.be.equals(key.toString('hex'));
+    });
+    it('constructor rejects invalid types', async () => {
+        let bytes = await crypto.randomBytes(32);
+        let key = new CryptographyKey(bytes);
+        // For test coverage
+        expect(bytes.toString('hex')).to.be.equal(key.slice().toString('hex'));
+        expect(false).to.be.equal(key.isPublicKey());
+    });
+    it('constructor rejects invalid types', () => {
+        expect(() => {
+            new CryptographyKey(new Uint8Array(32))
+        }).to.throw('Argument 1 must be an instance of Buffer.');
     });
 
     it('from()', async () => {
@@ -44,5 +57,27 @@ describe('CryptographyKey', () => {
             'hex'
         );
         expect(x25519pk instanceof X25519PublicKey).to.be.equals(true);
+
+        expect(ed25519sk.isPublicKey()).to.be.equals(false);
+        expect(ed25519pk.isPublicKey()).to.be.equals(true);
+        expect(ed25519sk.isEd25519Key()).to.be.equals(true);
+        expect(ed25519pk.isEd25519Key()).to.be.equals(true);
+        expect(ed25519sk.isX25519Key()).to.be.equals(false);
+        expect(ed25519pk.isX25519Key()).to.be.equals(false);
+
+        expect(x25519sk.isPublicKey()).to.be.equals(false);
+        expect(x25519pk.isPublicKey()).to.be.equals(true);
+        expect(x25519sk.isEd25519Key()).to.be.equals(false);
+        expect(x25519pk.isEd25519Key()).to.be.equals(false);
+        expect(x25519sk.isX25519Key()).to.be.equals(true);
+        expect(x25519pk.isX25519Key()).to.be.equals(true);
+
+        expect(() => {
+            new Ed25519SecretKey(Buffer.alloc(32))
+        }).to.throw('Ed25519 secret keys must be 64 bytes long');
+
+        expect(() => {
+            new Ed25519PublicKey(Buffer.alloc(64))
+        }).to.throw('Ed25519 public keys must be 32 bytes long');
     });
 });

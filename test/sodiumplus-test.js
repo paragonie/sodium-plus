@@ -20,6 +20,16 @@ let sodium;
 })();
 
 describe('SodiumPlus', () => {
+    it('index.js', async () => {
+        const indexFile = require('../index');
+        expect(typeof indexFile.getBackendObject()).to.be.equal('function');
+        expect(typeof indexFile.getBackendObject('SodiumNative')).to.be.equal('function');
+        expect(typeof indexFile.getBackendObject('LibsodiumWrappers')).to.be.equal('function');
+        expect(() => {
+            indexFile.getBackendObject('Sodium')
+        }).to.throw('Unrecognized backend type: Sodium');
+    });
+
     it('SodiumPlus.CONSTANTS', async () => {
         if (!sodium) sodium = await SodiumPlus.auto();
         let dummy = Util.populateConstants({});
