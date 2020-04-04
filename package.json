@@ -46,7 +46,7 @@
     "lib/"
   ],
   "scripts": {
-    "test": "mocha"
+    "test": "mocha-parallel-tests"
   },
   "devDependencies": {
     "@types/node": "^13.9.1",
@@ -54,6 +54,7 @@
     "browserify": "^16.5.0",
     "chai": "^4.2.0",
     "mkdirp": "^0.5.4",
+    "mocha-parallel-tests": "^2.3.0",
     "mocha": "^7.1.1",
     "tinyify": "^2.5.2"
   }
