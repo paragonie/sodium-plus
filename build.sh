@@ -18,4 +18,5 @@ echo "Build complete! Resetting..."
 
 # Once browserify finishes, rollback changes that removed sodium-native.
 git checkout -- lib/*
+git checkout -- lib/*/*
 echo "Done!"

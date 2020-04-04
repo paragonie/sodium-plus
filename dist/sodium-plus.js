@@ -66,6 +66,7 @@ module.exports = {
 },{"./lib/backend":3,"./lib/backend/libsodium-wrappers":4,"./lib/backend/sodiumnative":5,"./lib/cryptography-key":6,"./lib/keytypes/ed25519pk":7,"./lib/keytypes/ed25519sk":8,"./lib/keytypes/x25519pk":9,"./lib/keytypes/x25519sk":10,"./lib/polyfill":11,"./lib/sodium-error":12,"./lib/sodiumplus":13,"./lib/util":14}],3:[function(require,module,exports){
 (function (Buffer){
 const CryptographyKey = require('./cryptography-key');
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
@@ -82,9 +83,11 @@ module.exports = class Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_box_keypair_from_secretkey_and_publickey(sKey, pKey) {
+        /* istanbul ignore if */
         if (sKey.getLength() !== 32) {
             throw new Error('Secret key must be 32 bytes');
         }
+        /* istanbul ignore if */
         if (pKey.getLength() !== 32) {
             throw new Error('Public key must be 32 bytes');
         }
@@ -105,10 +108,12 @@ const Polyfill = require('../polyfill');
 const Util = require('../util');
 const SodiumError = require('../sodium-error');
 const toBuffer = require('typedarray-to-buffer');
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
 
+/* istanbul ignore next */
 module.exports = class LibsodiumWrappersBackend extends Backend {
     constructor(lib) {
         super(lib);
@@ -889,10 +894,12 @@ const CryptographyKey = require('../cryptography-key');
 const SodiumError = require('../sodium-error');
 const Util = require('../util');
 const toBuffer = require('typedarray-to-buffer');
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
 
+/* istanbul ignore next */
 module.exports = class SodiumNativeBackend extends Backend {
     constructor(lib) {
         super(lib);
@@ -1722,6 +1729,9 @@ module.exports = class SodiumNativeBackend extends Backend {
 }).call(this,require("buffer").Buffer)
 },{"../backend":3,"../cryptography-key":6,"../sodium-error":12,"../util":14,"buffer":74,"buffer/":17,"typedarray-to-buffer":25}],6:[function(require,module,exports){
 (function (Buffer){
+"use strict";
+
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
@@ -1738,7 +1748,7 @@ module.exports = class CryptographyKey {
         }
         Object.defineProperty(this, 'buffer', {
             enumerable: false,
-            value: buf
+            value: buf.slice()
         });
     }
 
@@ -1788,6 +1798,7 @@ module.exports = class CryptographyKey {
      * @param {string} encoding
      */
     toString(encoding = 'utf-8') {
+        /* istanbul ignore if */
         return this.getBuffer().toString(encoding);
     }
 
@@ -1807,7 +1818,6 @@ const CryptographyKey = require('../cryptography-key');
 class Ed25519PublicKey extends CryptographyKey {
     constructor(buf) {
         if (buf.length !== 32) {
-            console.log(buf.length);
             throw new Error('Ed25519 public keys must be 32 bytes long');
         }
         super(buf);
@@ -1933,11 +1943,13 @@ module.exports = X25519SecretKey;
 }).call(this,require("buffer").Buffer)
 },{"../cryptography-key":6,"buffer":74}],11:[function(require,module,exports){
 (function (Buffer){
+"use strict";
 const crypto = require('crypto');
 const Poly1305 = require('poly1305-js');
 const Util = require('./util');
 const XSalsa20 = require('xsalsa20');
 
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
@@ -2021,12 +2033,15 @@ const SodiumError = require('./sodium-error');
 const X25519PublicKey = require('./keytypes/x25519pk');
 const X25519SecretKey = require('./keytypes/x25519sk');
 const Util = require('./util');
+
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
 
 class SodiumPlus {
     constructor(backend) {
+        /* istanbul ignore if */
         if (!(backend instanceof Backend)) {
             throw new TypeError('Backend object must implement the backend function');
         }
@@ -2084,6 +2099,7 @@ class SodiumPlus {
      * @return {Promise<void>}
      */
     async ensureLoaded() {
+        /* istanbul ignore if */
         if (typeof (this.backend) === 'undefined') {
             try {
                 await SodiumPlus.auto();
@@ -2219,10 +2235,10 @@ class SodiumPlus {
     async crypto_box(plaintext, nonce, myPrivateKey, theirPublicKey) {
         await this.ensureLoaded();
         if (!(myPrivateKey instanceof X25519SecretKey)) {
-            throw new TypeError('Argument 3 must be an instance of CryptographyKey');
+            throw new TypeError('Argument 3 must be an instance of X25519SecretKey');
         }
         if (!(theirPublicKey instanceof X25519PublicKey)) {
-            throw new TypeError('Argument 4 must be an instance of CryptographyKey');
+            throw new TypeError('Argument 4 must be an instance of X25519PublicKey');
         }
         nonce = await Util.toBuffer(nonce);
         if (nonce.length !== 24) {
@@ -2248,10 +2264,10 @@ class SodiumPlus {
     async crypto_box_open(ciphertext, nonce, myPrivateKey, theirPublicKey) {
         await this.ensureLoaded();
         if (!(myPrivateKey instanceof X25519SecretKey)) {
-            throw new TypeError('Argument 3 must be an instance of CryptographyKey');
+            throw new TypeError('Argument 3 must be an instance of X25519SecretKey');
         }
         if (!(theirPublicKey instanceof X25519PublicKey)) {
-            throw new TypeError('Argument 4 must be an instance of CryptographyKey');
+            throw new TypeError('Argument 4 must be an instance of X25519PublicKey');
         }
         ciphertext = await Util.toBuffer(ciphertext);
         if (ciphertext.length < 16) {
@@ -2284,7 +2300,7 @@ class SodiumPlus {
      * @param {X25519PublicKey} pKey
      * @return {Promise<CryptographyKey>}
      */
-    async crypto_box_keypair_from_secretkey_and_secretkey(sKey, pKey) {
+    async crypto_box_keypair_from_secretkey_and_publickey(sKey, pKey) {
         await this.ensureLoaded();
         if (!(sKey instanceof X25519SecretKey)) {
             throw new TypeError('Argument 1 must be an instance of X25519SecretKey');
@@ -2292,7 +2308,7 @@ class SodiumPlus {
         if (!(pKey instanceof X25519PublicKey)) {
             throw new TypeError('Argument 2 must be an instance of X25519PublicKey');
         }
-        return await this.backend.crypto_box_keypair_from_secretkey_and_secretkey(sKey, pKey);
+        return await this.backend.crypto_box_keypair_from_secretkey_and_publickey(sKey, pKey);
     }
 
     /**
@@ -2603,6 +2619,7 @@ class SodiumPlus {
      */
     async crypto_pwhash(length, password, salt, opslimit, memlimit, algorithm = null) {
         await this.ensureLoaded();
+        /* istanbul ignore if */
         if (!algorithm) {
             algorithm = this.CRYPTO_PWHASH_ALG_DEFAULT;
         }
@@ -3207,6 +3224,7 @@ module.exports = SodiumPlus;
 (function (Buffer){
 "use strict";
 
+/* istanbul ignore if */
 if (typeof (Buffer) === 'undefined') {
     let Buffer = require('buffer/').Buffer;
 }
