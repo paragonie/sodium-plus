@@ -1230,14 +1230,22 @@ module.exports = class SodiumNativeBackend extends Backend {
      */
     async crypto_pwhash(length, password, salt, opslimit, memlimit, algorithm) {
         let hashed = Buffer.alloc(length, 0);
-        this.sodium.crypto_pwhash(
-            hashed,
-            await Util.toBuffer(password),
-            await Util.toBuffer(salt),
-            opslimit,
-            memlimit,
-            algorithm
-        );
+        const bufPass = await Util.toBuffer(password);
+        const bufSalt = await Util.toBuffer(salt);
+        await new Promise((resolve, reject) => {
+            this.sodium.crypto_pwhash_async(
+                hashed,
+                bufPass,
+                bufSalt,
+                opslimit,
+                memlimit,
+                algorithm,
+                (e, res) => {
+                    if (e) return reject(e);
+                    return resolve(res);
+                }
+            );
+        });
         return hashed;
     }
 
@@ -1249,12 +1257,19 @@ module.exports = class SodiumNativeBackend extends Backend {
      */
     async crypto_pwhash_str(password, opslimit, memlimit) {
         let hashed = Buffer.alloc(128, 0);
-        this.sodium.crypto_pwhash_str(
-            hashed,
-            await Util.toBuffer(password),
-            opslimit,
-            memlimit
-        );
+        const bufPass = await Util.toBuffer(password);
+        await new Promise((resolve, reject) => {
+            this.sodium.crypto_pwhash_str_async(
+                hashed,
+                bufPass,
+                opslimit,
+                memlimit,
+                (e, res) => {
+                    if (e) return reject(e);
+                    return resolve(res);
+                }
+            );
+        });
         return hashed.toString();
 
     }
@@ -1267,10 +1282,17 @@ module.exports = class SodiumNativeBackend extends Backend {
     async crypto_pwhash_str_verify(password, hash) {
         let allocated = Buffer.alloc(128, 0);
         (await Util.toBuffer(hash)).copy(allocated, 0, 0);
-        return this.sodium.crypto_pwhash_str_verify(
-            allocated,
-            await Util.toBuffer(password)
-        );
+        const bufPass = await Util.toBuffer(password);
+        return new Promise((resolve, reject) => {
+            this.sodium.crypto_pwhash_str_verify_async(
+                allocated,
+                bufPass,
+                (e, res) => {
+                    if (e) return reject(e);
+                    return resolve(res);
+                }
+            );
+        });
     }
 
     /**
@@ -5076,17 +5098,6 @@ function Buffer (arg, encodingOrOffset, length) {
     return allocUnsafe(arg)
   }
   return from(arg, encodingOrOffset, length)
-}
-
-// Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
-if (typeof Symbol !== 'undefined' && Symbol.species != null &&
-    Buffer[Symbol.species] === Buffer) {
-  Object.defineProperty(Buffer, Symbol.species, {
-    value: null,
-    configurable: true,
-    enumerable: false,
-    writable: false
-  })
 }
 
 Buffer.poolSize = 8192 // not used by this implementation
