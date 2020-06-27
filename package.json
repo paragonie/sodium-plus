@@ -1,6 +1,6 @@
 {
   "name": "sodium-plus",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "The Sodium Cryptography Library",
   "author": "Paragon Initiative Enterprises, LLC",
   "license": "ISC",
@@ -41,6 +41,8 @@
   "files": [
     "build",
     "build.sh",
+    "dist/sodium-plus.js",
+    "dist/sodium-plus.min.js",
     "index.d.ts",
     "index.js",
     "lib/"
@@ -50,14 +52,14 @@
     "parallel-test": "mocha-parallel-tests"
   },
   "devDependencies": {
-    "@types/node": "^13.9.1",
+    "@types/node": "^14.0.14",
     "assert": "^2.0.0",
-    "browserify": "^16.5.0",
+    "browserify": "^16.5.1",
     "chai": "^4.2.0",
-    "mkdirp": "^0.5.4",
+    "mkdirp": "^1.0.4",
     "mocha-parallel-tests": "^2.3.0",
-    "mocha": "^7.1.1",
-    "nyc": "^15.0.1",
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
     "tinyify": "^2.5.2"
   }
 }
