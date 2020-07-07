@@ -415,16 +415,16 @@ describe('SodiumPlus', () => {
         if (!sodium) sodium = await SodiumPlus.auto();
 
         let key = await sodium.crypto_secretstream_xchacha20poly1305_keygen();
-        let pushState, pullState, header;
-        [pushState, header] = await sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
-        pullState = await sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, header);
+        let encryptor, decryptor;
+        encryptor = await sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
+        decryptor = await sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, encryptor.header);
 
         await expectError(
             sodium.crypto_secretstream_xchacha20poly1305_init_push(Buffer.alloc(31)),
             'Key must be an instance of CryptographyKey'
         );
         await expectError(
-            sodium.crypto_secretstream_xchacha20poly1305_init_pull(Buffer.alloc(31), header),
+            sodium.crypto_secretstream_xchacha20poly1305_init_pull(Buffer.alloc(31), encryptor.header),
             'Key must be an instance of CryptographyKey'
         );
 
@@ -434,18 +434,18 @@ describe('SodiumPlus', () => {
             'crypto_secretstream keys must be 32 bytes long'
         );
         await expectError(
-            sodium.crypto_secretstream_xchacha20poly1305_init_pull(invalidKey, header),
+            sodium.crypto_secretstream_xchacha20poly1305_init_pull(invalidKey, encryptor.header),
             'crypto_secretstream keys must be 32 bytes long'
         );
         await expectError(
-            sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, header.slice(1)),
+            sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, encryptor.header.slice(1)),
             'crypto_secretstream headers must be 24 bytes long'
         );
 
         // Get a test input from the text file.
         let longText = await fsp.readFile(path.join(__dirname, 'longtext.md'));
         let chunk, readUntil;
-        let ciphertext = Buffer.concat([header]);
+        let ciphertext = Buffer.concat([encryptor.header]);
 
         // How big are our chunks going to be?
         let PUSH_CHUNK_SIZE = await sodium.randombytes_uniform(longText.length - 32) + 32;
@@ -454,27 +454,25 @@ describe('SodiumPlus', () => {
         // Encrypt
         for (let i = 0; i < longText.length; i += PUSH_CHUNK_SIZE) {
             readUntil = (i + PUSH_CHUNK_SIZE) > longText.length ? longText.length : i + PUSH_CHUNK_SIZE;
-            chunk = await sodium.crypto_secretstream_xchacha20poly1305_push(
-                pushState,
+            chunk = await encryptor.push(
                 longText.slice(i, readUntil)
             );
             ciphertext = Buffer.concat([ciphertext, chunk]);
         }
         expect(ciphertext.slice(0, 24).toString('hex')).to.be
-            .equals(header.toString('hex'));
+            .equals(encryptor.header.toString('hex'));
 
         // Decrypt, starting at 24 (after the header, which we already have)
         let decrypted = Buffer.alloc(0);
         for (let i = 24; i < ciphertext.length; i += PULL_CHUNK_SIZE) {
             readUntil = (i + PULL_CHUNK_SIZE) > ciphertext.length ? ciphertext.length : i + PULL_CHUNK_SIZE;
-            chunk = await sodium.crypto_secretstream_xchacha20poly1305_pull(
-                pullState,
+            chunk = await decryptor.pull(
                 ciphertext.slice(i, readUntil)
             );
             decrypted = Buffer.concat([decrypted, chunk]);
         }
         expect(decrypted.toString('hex')).to.be.equals(longText.toString('hex'));
-        await sodium.crypto_secretstream_xchacha20poly1305_rekey(pushState);
+        await encryptor.rekey();
     });
 
     it('SodiumPlus.crypto_shorthash', async() => {
