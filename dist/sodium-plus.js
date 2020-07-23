@@ -91,7 +91,7 @@ module.exports = class Backend {
         if (pKey.getLength() !== 32) {
             throw new Error('Public key must be 32 bytes');
         }
-        let keypair = Buffer.alloc(64);
+        const keypair = Buffer.alloc(64);
         sKey.getBuffer().copy(keypair, 0, 0, 32);
         pKey.getBuffer().copy(keypair, 32, 0, 32);
         return new CryptographyKey(Buffer.from(keypair));
@@ -266,7 +266,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_box_keypair() {
-        let obj = this.sodium.crypto_box_keypair();
+        const obj = this.sodium.crypto_box_keypair();
         return new CryptographyKey(
             Buffer.concat([
                 await Util.toBuffer(obj.privateKey),
@@ -338,7 +338,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<CryptographyKey[]>}
      */
     async crypto_kx_client_session_keys(clientPublicKey, clientSecretKey, serverPublicKey) {
-        let gen = this.sodium.crypto_kx_client_session_keys(
+        const gen = this.sodium.crypto_kx_client_session_keys(
             clientPublicKey.getBuffer(),
             clientSecretKey.getBuffer(),
             serverPublicKey.getBuffer(),
@@ -356,7 +356,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<CryptographyKey[]>}
      */
     async crypto_kx_server_session_keys(serverPublicKey, serverSecretKey, clientPublicKey) {
-        let gen = this.sodium.crypto_kx_server_session_keys(
+        const gen = this.sodium.crypto_kx_server_session_keys(
             serverPublicKey.getBuffer(),
             serverSecretKey.getBuffer(),
             clientPublicKey.getBuffer(),
@@ -607,7 +607,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_sign_keypair() {
-        let obj = this.sodium.crypto_sign_keypair();
+        const obj = this.sodium.crypto_sign_keypair();
         return new CryptographyKey(
             Buffer.concat([
                 await Util.toBuffer(obj.privateKey),
@@ -621,7 +621,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_sign_seed_keypair(seed) {
-        let obj = this.sodium.crypto_sign_seed_keypair(seed);
+        const obj = this.sodium.crypto_sign_seed_keypair(seed);
         return new CryptographyKey(
             Buffer.concat([
                 await Util.toBuffer(obj.privateKey),
@@ -709,7 +709,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<array>} [state, header]
      */
     async crypto_secretstream_xchacha20poly1305_init_push(key) {
-        let res = this.sodium.crypto_secretstream_xchacha20poly1305_init_push(key.getBuffer());
+        const res = this.sodium.crypto_secretstream_xchacha20poly1305_init_push(key.getBuffer());
         return [res.state, await Util.toBuffer(res.header)];
     }
 
@@ -754,7 +754,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
         if (ciphertext.length < this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES) {
             throw new SodiumError('Invalid ciphertext size');
         }
-        let out = this.sodium.crypto_secretstream_xchacha20poly1305_pull(
+        const out = this.sodium.crypto_secretstream_xchacha20poly1305_pull(
             state,
             await Util.toBuffer(ciphertext),
             ad.length > 0 ? (await Util.toBuffer(ad)) : null,
@@ -796,7 +796,7 @@ module.exports = class LibsodiumWrappersBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async sodium_add(val, addv) {
-        let buf = await Util.cloneBuffer(val);
+        const buf = await Util.cloneBuffer(val);
         this.sodium.add(buf, addv);
         return buf;
     }
@@ -923,7 +923,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_aead_xchacha20poly1305_ietf_decrypt(ciphertext, assocData, nonce, key) {
-        let plaintext = Buffer.alloc(ciphertext.length - 16, 0);
+        const plaintext = Buffer.alloc(ciphertext.length - 16, 0);
         this.sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
             plaintext,
             null,
@@ -944,15 +944,14 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, assocData, nonce, key) {
-        let ciphertext = Buffer.alloc(plaintext.length + 16, 0);
-        let kbuf = key.getBuffer();
+        const ciphertext = Buffer.alloc(plaintext.length + 16, 0);
         this.sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
             ciphertext,
             await Util.toBuffer(plaintext),
             await Util.toBuffer(assocData),
             null,
             await Util.toBuffer(nonce),
-            kbuf
+            key.getBuffer()
         );
         return ciphertext;
     }
@@ -963,7 +962,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<buffer>}
      */
     async crypto_auth(message, key) {
-        let output = Buffer.alloc(32);
+        const output = Buffer.alloc(32);
         this.sodium.crypto_auth(
             output,
             await Util.toBuffer(message),
@@ -995,7 +994,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      *
      */
     async crypto_box(plaintext, nonce, sk, pk) {
-        let ciphertext = Buffer.alloc(plaintext.length + 16);
+        const ciphertext = Buffer.alloc(plaintext.length + 16);
         this.sodium.crypto_box_easy(
             ciphertext,
             await Util.toBuffer(plaintext),
@@ -1014,8 +1013,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_box_open(ciphertext, nonce, sk, pk) {
-        let plaintext = Buffer.alloc(ciphertext.length - 16);
-        let success = this.sodium.crypto_box_open_easy(
+        const plaintext = Buffer.alloc(ciphertext.length - 16);
+        const success = this.sodium.crypto_box_open_easy(
             plaintext,
             ciphertext,
             nonce,
@@ -1035,7 +1034,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      *
      */
     async crypto_box_seal(plaintext, pk) {
-        let ciphertext = Buffer.alloc(plaintext.length + 48);
+        const ciphertext = Buffer.alloc(plaintext.length + 48);
         this.sodium.crypto_box_seal(
             ciphertext,
             await Util.toBuffer(plaintext),
@@ -1051,8 +1050,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_box_seal_open(ciphertext, pk, sk) {
-        let plaintext = Buffer.alloc(ciphertext.length - 48);
-        let success = this.sodium.crypto_box_seal_open(
+        const plaintext = Buffer.alloc(ciphertext.length - 48);
+        const success = this.sodium.crypto_box_seal_open(
             plaintext,
             await Util.toBuffer(ciphertext),
             pk.getBuffer(),
@@ -1068,8 +1067,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_box_keypair() {
-        let sK = Buffer.alloc(32, 0);
-        let pK = Buffer.alloc(32, 0);
+        const sK = Buffer.alloc(32, 0);
+        const pK = Buffer.alloc(32, 0);
         this.sodium.crypto_box_keypair(sK, pK);
         return new CryptographyKey(
             Buffer.concat([pK, sK])
@@ -1083,7 +1082,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_generichash(message, key = null, outputLength = 32) {
-        let hash = Buffer.alloc(outputLength);
+        const hash = Buffer.alloc(outputLength);
         if (key) {
             this.sodium.crypto_generichash(hash, await Util.toBuffer(message), key.getBuffer());
         } else {
@@ -1098,7 +1097,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_generichash_init(key = null, outputLength = 32) {
-        let state = Buffer.alloc(this.CRYPTO_GENERICHASH_STATEBYTES);
+        const state = Buffer.alloc(this.CRYPTO_GENERICHASH_STATEBYTES);
         if (key) {
             this.sodium.crypto_generichash_init(state, key.getBuffer(), outputLength);
         } else {
@@ -1123,7 +1122,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_generichash_final(state, outputLength = 32) {
-        let output = Buffer.alloc(outputLength);
+        const output = Buffer.alloc(outputLength);
         this.sodium.crypto_generichash_final(state, output);
         return output;
     }
@@ -1136,7 +1135,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_kdf_derive_from_key(length, subKeyId, context, key) {
-        let subkey = Buffer.alloc(length, 0);
+        const subkey = Buffer.alloc(length, 0);
         this.sodium.crypto_kdf_derive_from_key(
             subkey,
             subKeyId | 0,
@@ -1153,8 +1152,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey[]>}
      */
     async crypto_kx_client_session_keys(clientPublicKey, clientSecretKey, serverPublicKey) {
-        let rx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
-        let tx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
+        const rx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
+        const tx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
         this.sodium.crypto_kx_client_session_keys(
             rx,
             tx,
@@ -1175,8 +1174,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey[]>}
      */
     async crypto_kx_server_session_keys(serverPublicKey, serverSecretKey, clientPublicKey) {
-        let rx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
-        let tx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
+        const rx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
+        const tx = Buffer.alloc(this.CRYPTO_KX_SESSIONKEYBYTES);
         this.sodium.crypto_kx_server_session_keys(
             rx,
             tx,
@@ -1196,7 +1195,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_onetimeauth(message, key) {
-        let output = Buffer.alloc(16);
+        const output = Buffer.alloc(16);
         this.sodium.crypto_onetimeauth(
             output,
             await Util.toBuffer(message),
@@ -1229,7 +1228,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_pwhash(length, password, salt, opslimit, memlimit, algorithm) {
-        let hashed = Buffer.alloc(length, 0);
+        const hashed = Buffer.alloc(length, 0);
         const bufPass = await Util.toBuffer(password);
         const bufSalt = await Util.toBuffer(salt);
         await new Promise((resolve, reject) => {
@@ -1256,7 +1255,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<string>}
      */
     async crypto_pwhash_str(password, opslimit, memlimit) {
-        let hashed = Buffer.alloc(128, 0);
+        const hashed = Buffer.alloc(128, 0);
         const bufPass = await Util.toBuffer(password);
         await new Promise((resolve, reject) => {
             this.sodium.crypto_pwhash_str_async(
@@ -1280,7 +1279,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<boolean>}
      */
     async crypto_pwhash_str_verify(password, hash) {
-        let allocated = Buffer.alloc(128, 0);
+        const allocated = Buffer.alloc(128, 0);
         (await Util.toBuffer(hash)).copy(allocated, 0, 0);
         const bufPass = await Util.toBuffer(password);
         return new Promise((resolve, reject) => {
@@ -1302,7 +1301,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<boolean>}
      */
     async crypto_pwhash_str_needs_rehash(hash, opslimit, memlimit) {
-        let allocated = Buffer.alloc(128, 0);
+        const allocated = Buffer.alloc(128, 0);
         (await Util.toBuffer(hash)).copy(allocated, 0, 0);
         return this.sodium.crypto_pwhash_str_needs_rehash(
             allocated,
@@ -1317,7 +1316,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_scalarmult(secretKey, publicKey) {
-        let shared = Buffer.alloc(32);
+        const shared = Buffer.alloc(32);
         this.sodium.crypto_scalarmult(shared, secretKey.getBuffer(), publicKey.getBuffer());
         return new CryptographyKey(
             await Util.toBuffer(shared)
@@ -1330,7 +1329,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_scalarmult_base(secretKey) {
-        let buf = Buffer.alloc(32);
+        const buf = Buffer.alloc(32);
         this.sodium.crypto_scalarmult_base(buf, secretKey.getBuffer());
         return buf;
     }
@@ -1343,7 +1342,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_secretbox(plaintext, nonce, key) {
-        let encrypted = Buffer.alloc(plaintext.length + 16);
+        const encrypted = Buffer.alloc(plaintext.length + 16);
         this.sodium.crypto_secretbox_easy(
             encrypted,
             await Util.toBuffer(plaintext),
@@ -1359,7 +1358,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_shorthash(message, key) {
-        let output = Buffer.alloc(8);
+        const output = Buffer.alloc(8);
         this.sodium.crypto_shorthash(
             output,
             await Util.toBuffer(message),
@@ -1375,7 +1374,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_secretbox_open(ciphertext, nonce, key) {
-        let decrypted = Buffer.alloc(ciphertext.length - 16);
+        const decrypted = Buffer.alloc(ciphertext.length - 16);
         if (!this.sodium.crypto_secretbox_open_easy(
             decrypted,
             ciphertext,
@@ -1392,8 +1391,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<array>} [state, header]
      */
     async crypto_secretstream_xchacha20poly1305_init_push(key) {
-        let state = Buffer.alloc(this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_STATEBYTES);
-        let header = Buffer.alloc(this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES);
+        const state = Buffer.alloc(this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_STATEBYTES);
+        const header = Buffer.alloc(this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES);
         this.sodium.randombytes_buf(header);
         this.sodium.crypto_secretstream_xchacha20poly1305_init_push(state, header, key.getBuffer());
         return [state, header];
@@ -1408,7 +1407,7 @@ module.exports = class SodiumNativeBackend extends Backend {
         if (header.length !== this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES) {
             throw new SodiumError(`Header must be ${this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES} bytes long`);
         }
-        let state = Buffer.alloc(this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_STATEBYTES);
+        const state = Buffer.alloc(this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_STATEBYTES);
         this.sodium.crypto_secretstream_xchacha20poly1305_init_pull(state, header, key.getBuffer());
         return state;
     }
@@ -1421,7 +1420,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_secretstream_xchacha20poly1305_push(state, message, ad = '', tag = 0) {
-        let ciphertext = Buffer.alloc(message.length + this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES);
+        const ciphertext = Buffer.alloc(message.length + this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES);
         this.sodium.crypto_secretstream_xchacha20poly1305_push(
             state,
             ciphertext,
@@ -1443,11 +1442,11 @@ module.exports = class SodiumNativeBackend extends Backend {
         if (ciphertext.length < this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES) {
             throw new SodiumError('Invalid ciphertext size');
         }
-        let plaintext = Buffer.alloc(ciphertext.length - this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES);
+        const plaintext = Buffer.alloc(ciphertext.length - this.CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES);
         this.sodium.crypto_secretstream_xchacha20poly1305_pull(
             state,
             plaintext,
-            new Buffer([tag]),
+            Buffer.from([tag]),
             ciphertext,
             ad.length > 0 ? (await Util.toBuffer(ad)) : null
         );
@@ -1468,7 +1467,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_sign(message, secretKey) {
-        let signed = Buffer.alloc(message.length + 64);
+        const signed = Buffer.alloc(message.length + 64);
         this.sodium.crypto_sign(signed, await Util.toBuffer(message), secretKey.getBuffer());
         return signed;
     }
@@ -1479,7 +1478,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_sign_open(signedMessage, publicKey) {
-        let original = Buffer.alloc(signedMessage.length - 64);
+        const original = Buffer.alloc(signedMessage.length - 64);
         this.sodium.crypto_sign_open(original, await Util.toBuffer(signedMessage), publicKey.getBuffer());
         return original;
     }
@@ -1490,7 +1489,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_sign_detached(message, secretKey) {
-        let signature = Buffer.alloc(64);
+        const signature = Buffer.alloc(64);
         this.sodium.crypto_sign_detached(signature, await Util.toBuffer(message), secretKey.getBuffer());
         return signature;
     }
@@ -1513,8 +1512,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_sign_keypair() {
-        let sK = Buffer.alloc(64, 0);
-        let pK = Buffer.alloc(32, 0);
+        const sK = Buffer.alloc(64, 0);
+        const pK = Buffer.alloc(32, 0);
         this.sodium.crypto_sign_keypair(pK, sK);
         return new CryptographyKey(
             Buffer.concat([sK, pK])
@@ -1526,8 +1525,8 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<CryptographyKey>}
      */
     async crypto_sign_seed_keypair(seed) {
-        let sK = Buffer.alloc(64, 0);
-        let pK = Buffer.alloc(32, 0);
+        const sK = Buffer.alloc(64, 0);
+        const pK = Buffer.alloc(32, 0);
         this.sodium.crypto_sign_seed_keypair(pK, sK, seed);
         return new CryptographyKey(
             Buffer.concat([sK, pK])
@@ -1539,7 +1538,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_sign_ed25519_sk_to_curve25519(sk) {
-        let xsk = Buffer.alloc(32);
+        const xsk = Buffer.alloc(32);
         this.sodium.crypto_sign_ed25519_sk_to_curve25519(xsk, sk.getBuffer());
         return xsk;
     }
@@ -1549,7 +1548,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_sign_ed25519_pk_to_curve25519(pk) {
-        let xpk = Buffer.alloc(32);
+        const xpk = Buffer.alloc(32);
         this.sodium.crypto_sign_ed25519_pk_to_curve25519(xpk, pk.getBuffer());
         return xpk;
     }
@@ -1561,7 +1560,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_stream(length, nonce, key) {
-        let output = Buffer.alloc(length);
+        const output = Buffer.alloc(length);
         this.sodium.crypto_stream(
             output,
             await Util.toBuffer(nonce),
@@ -1577,7 +1576,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async crypto_stream_xor(plaintext, nonce, key) {
-        let output = Buffer.alloc(plaintext.length);
+        const output = Buffer.alloc(plaintext.length);
         this.sodium.crypto_stream_xor(
             output,
             await Util.toBuffer(plaintext),
@@ -1611,7 +1610,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async sodium_add(val, addv) {
-        let buf = await Util.cloneBuffer(val);
+        const buf = await Util.cloneBuffer(val);
         this.sodium.sodium_add(buf, addv);
         return buf;
     }
@@ -1658,7 +1657,7 @@ module.exports = class SodiumNativeBackend extends Backend {
             c_num = 0,
             c_val = 0,
             state = 0;
-        let bin = Buffer.alloc(hex.length >> 1, 0);
+        const bin = Buffer.alloc(hex.length >> 1, 0);
 
         while (hex_pos < hex.length) {
             c = hex.charCodeAt(hex_pos);
@@ -1730,9 +1729,9 @@ module.exports = class SodiumNativeBackend extends Backend {
         if (length < blockSize) {
             length += blockSize;
         }
-        let padded = Buffer.alloc(length + 100);
+        const padded = Buffer.alloc(length + 100);
         buf.copy(padded, 0, 0);
-        let sliceto = this.sodium.sodium_pad(padded, buf.length, blockSize);
+        const sliceto = this.sodium.sodium_pad(padded, buf.length, blockSize);
         return padded.slice(0, sliceto);
     }
 
@@ -1743,7 +1742,7 @@ module.exports = class SodiumNativeBackend extends Backend {
      * @return {Promise<Buffer>}
      */
     async sodium_unpad(buf, blockSize) {
-        let outlen = this.sodium.sodium_unpad(buf, buf.length, blockSize);
+        const outlen = this.sodium.sodium_unpad(buf, buf.length, blockSize);
         return buf.slice(0, outlen);
     }
 };
@@ -2011,8 +2010,8 @@ module.exports = class SodiumPolyfill {
      * @return {Promise<Buffer>}
      */
     static async crypto_stream_xor(plaintext, nonce, key) {
-        let stream = XSalsa20(nonce, key.getBuffer());
-        let output = stream.update(plaintext);
+        const stream = XSalsa20(nonce, key.getBuffer());
+        const output = stream.update(plaintext);
         stream.finalize();
         return Util.toBuffer(output);
     }
@@ -2027,9 +2026,9 @@ module.exports = class SodiumPolyfill {
      * @return {Promise<boolean>}
      */
     static async crypto_pwhash_str_needs_rehash(hash, opslimit, memlimit) {
-        let pwhash = (await Util.toBuffer(hash)).toString('utf-8');
-        let pieces = pwhash.split('$');
-        let expect = 'm=' + (memlimit >> 10) + ',t=' + opslimit + ',p=1';
+        const pwhash = (await Util.toBuffer(hash)).toString('utf-8');
+        const pieces = pwhash.split('$');
+        const expect = 'm=' + (memlimit >> 10) + ',t=' + opslimit + ',p=1';
         if (expect.length !== pieces[3].length) {
             return true;
         }
@@ -2531,8 +2530,8 @@ class SodiumPlus {
      */
     async crypto_kx_seed_keypair(seed) {
         await this.ensureLoaded();
-        let sk = await this.backend.crypto_generichash(seed, null, this.CRYPTO_KX_SECRETKEYBYTES);
-        let pk = await this.backend.crypto_scalarmult_base(new CryptographyKey(sk));
+        const sk = await this.backend.crypto_generichash(seed, null, this.CRYPTO_KX_SECRETKEYBYTES);
+        const pk = await this.backend.crypto_scalarmult_base(new CryptographyKey(sk));
         return new CryptographyKey(Buffer.concat([sk, pk]));
     }
 
@@ -2807,7 +2806,12 @@ class SodiumPlus {
         if (key.getLength() !== 32) {
             throw new SodiumError('crypto_secretstream keys must be 32 bytes long');
         }
-        return this.backend.crypto_secretstream_xchacha20poly1305_init_push(key);
+        const [state, header] = await this.backend.crypto_secretstream_xchacha20poly1305_init_push(key);
+        return Object.freeze({
+            header: header,
+            push: this.crypto_secretstream_xchacha20poly1305_push.bind(this, state),
+            rekey: this.crypto_secretstream_xchacha20poly1305_rekey.bind(this, state)
+        });
     }
 
     /**
@@ -2829,7 +2833,10 @@ class SodiumPlus {
         if (key.getLength() !== 32) {
             throw new SodiumError('crypto_secretstream keys must be 32 bytes long');
         }
-        return this.backend.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
+        const state = await this.backend.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
+        return Object.freeze({
+            pull: this.crypto_secretstream_xchacha20poly1305_pull.bind(this, state)
+        });
     }
 
     /**
@@ -4983,7 +4990,7 @@ if (typeof module !== "undefined" && module.hasOwnProperty("exports")) {
 
 //amd check
 if (typeof define === "function" && define.amd) {
-    define("big-integer", [], function () {
+    define( function () {
         return bigInt;
     });
 }
