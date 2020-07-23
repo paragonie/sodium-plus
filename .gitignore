@@ -3,3 +3,4 @@
 /package-lock.json
 *-tmp.js
 /nbproject
+/.nyc_output
