@@ -35,7 +35,7 @@ Returns a `Promise` that resolves to a `CryptographyKey` containing a 64-byte
 `Buffer`. The first 32 bytes are your X25519 secret key, the latter 32 are your
 X25519 public key.
 
-### crypto_box_keypair_from_secretkey_and_secretkey
+### crypto_box_keypair_from_secretkey_and_publickey
 
 Combine two X25519 keys (secret, public) into a keypair object.
 
