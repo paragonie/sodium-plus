@@ -10,22 +10,12 @@ Initialize a stream for streaming encryption.
 
 1. `{CryptographyKey}` key
 
-Returns a `Promise` that resolves to an `array` with 2 elements:
+Returns a `Promise` that resolves to a [Stream Encryptor object](#stream-encryptor-object)
+wrapping backend-specific state in order to restrict direct access to it:
 
-1. A 24-byte header that should be included in the encrypted stream.
-2. A backend-specific `state`:
-    * `LibsodiumWrappers` returns a `number` (a pointer to an internal buffer)
-    * `SodiumNative` returns a `CryptoSecretstreamXchacha20poly1305StateWrap`
-      object
-
-The `{state}` type annotation below refers to one of the backend-specific state 
-types.
-
-You'll typically want to use it with list unpacking syntax, like so:
-
-```
-[state, header] = await sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
-```
+* `LibsodiumWrappers` returns a `number` (a pointer to an internal buffer)
+* `SodiumNative` returns a `CryptoSecretstreamXchacha20poly1305StateWrap`
+  object
 
 ### crypto_secretstream_xchacha20poly1305_init_pull()
 
@@ -36,38 +26,61 @@ Initialize a stream for streaming decryption.
 1. `{CryptographyKey}` key
 2. `{Buffer}` header (must be 24 bytes)
 
-Returns a `Promise` that resolves to a backend-specific `state`:
+Returns a `Promise` that resolves to a [Stream Decryptor object](#stream-decryptor-object)
+wrapping backend-specific state in order to restrict direct access to it:
 
 * `LibsodiumWrappers` returns a `number` (a pointer to an internal buffer)
 * `SodiumNative` returns a `CryptoSecretstreamXchacha20poly1305StateWrap`
   object
 
-The `{state}` type annotation below refers to one of the backend-specific state 
-types.
+### Stream Encryptor object
 
-### crypto_secretstream_xchacha20poly1305_push()
+[`crypto_secretstream_xchacha20poly1305_init_push`](#crypto_secretstream_xchacha20poly1305_init_push) method
+returns a `Promise` that resolves to an object with following properties & methods:
+
+* Property [`header`](#header): a 24-byte header that should be included in the encrypted stream.
+* Method [`push`](#push): encrypt some data in a stream.
+* Method [`rekey`](#rekey): deterministic re-keying of the internal state.
+
+#### `header`
+
+A 24-byte header that should be included in the encrypted stream.
+
+#### `push`
 
 Encrypt some data in a stream.
 
 **Parameters and their respective types**:
 
-1. `{state}` state
-2. `{string|Buffer}` message
-3. `{string|Buffer}` (optional) additional associated data
-4. `{number}` tag (default = 0, see libsodium docs)
+1. `{string|Buffer}` message
+1. `{string|Buffer}` (optional) additional associated data
+1. `{number}` tag (default = 0, see libsodium docs)
 
 Returns a `Promise` that resolves to a `Buffer` containing the ciphertext.
 
-### crypto_secretstream_xchacha20poly1305_pull()
+#### `rekey`
+
+Deterministic re-keying of the internal state.
+
+Returns a `Promise` that resolves to `undefined`. Instead,
+the underlying backend-specific `state` is overwritten in-place.
+
+### Stream Decryptor object
+
+[`crypto_secretstream_xchacha20poly1305_init_pull`](#crypto_secretstream_xchacha20poly1305_init_pull) method
+returns a `Promise` that resolves to an object with following method:
+
+* Method [`pull`](#pull): decrypt some data in a stream.
+
+#### `pull`
 
 Decrypt some data in a stream.
 
 **Parameters and their respective types**:
 
-1. `{state}` state
-2. `{string|Buffer}` ciphertext
-3. `{string|Buffer}` (optional) additional associated data
-4. `{number}` tag (default = 0, see libsodium docs)
+1. `{string|Buffer}` ciphertext
+1. `{string|Buffer}` (optional) additional associated data
+1. `{number}` tag (default = 0, see libsodium docs)
 
 Returns a `Promise` that resolves to a `Buffer` containing
 decrypted plaintext.
@@ -76,17 +89,6 @@ decrypted plaintext.
 
 Returns a `CryptographyKey` object containing a key appropriate
 for the `crypto_secretstream` API.
-
-### crypto_secretstream_xchacha20poly1305_rekey()
-
-Deterministic re-keying of the internal state.
-
-**Parameters and their respective types**:
-
-1. `{state}` state
-
-Returns a `Promise` that resolves to `undefined`. Instead,
-the `state` variable is overwritten in-place.
 
 ### Example for crypto_secretstream_xchacha20poly1305
 
@@ -100,13 +102,13 @@ let sodium;
     if (!sodium) sodium = await SodiumPlus.auto();
 
     let key = await sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    let pushState, pullState, header;
-    [pushState, header] = await sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
+    let encryptor, decryptor;
+    encryptor = await sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
 
     // Get a test input from the text file.
     let longText = await fsp.readFile(path.join(__dirname, 'encrypted-streams.md'));
     let chunk, readUntil;
-    let ciphertext = Buffer.concat([header]);
+    let ciphertext = Buffer.concat([encryptor.header]);
 
     // How big are our chunks going to be?
     let PUSH_CHUNK_SIZE = await sodium.randombytes_uniform(longText.length - 32) + 32;
@@ -115,20 +117,18 @@ let sodium;
     // Encryption...
     for (let i = 0; i < longText.length; i += PUSH_CHUNK_SIZE) {
         readUntil = (i + PUSH_CHUNK_SIZE) > longText.length ? longText.length : i + PUSH_CHUNK_SIZE;
-        chunk = await sodium.crypto_secretstream_xchacha20poly1305_push(
-            pushState,
+        chunk = await encryptor.push(
             longText.slice(i, readUntil)
         );
         ciphertext = Buffer.concat([ciphertext, chunk]);
     }
 
-    pullState = await sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, header);
-    // Decrypt, starting at 24 (after the header, which we already have)
+    decryptor = await sodium.crypto_secretstream_xchacha20poly1305_init_pull(key, ciphertext.slice(0, 24));
+    // Decrypt, starting at 24 (after the header already extracted above)
     let decrypted = Buffer.alloc(0);
     for (let i = 24; i < ciphertext.length; i += PULL_CHUNK_SIZE) {
         readUntil = (i + PULL_CHUNK_SIZE) > ciphertext.length ? ciphertext.length : i + PULL_CHUNK_SIZE;
-        chunk = await sodium.crypto_secretstream_xchacha20poly1305_pull(
-            pullState,
+        chunk = await decryptor.pull(
             ciphertext.slice(i, readUntil)
         );
         decrypted = Buffer.concat([decrypted, chunk]);
