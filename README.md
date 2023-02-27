@@ -65,9 +65,11 @@ const { SodiumPlus } = require('sodium-plus');
     let ciphertext = await sodium.crypto_secretbox(message, nonce, key);
     console.log(ciphertext);
     let decrypted = await sodium.crypto_secretbox_open(ciphertext, nonce, key);
-    console.log(decrypted.toString('utf-8'));
+    console.log(decrypted.toString());
 })();
 ```
+Note: Unicode not supported, For support it, convert message in base64 string and decode after decrypt.
+
 
 This should produce output similar to below (but with different random-looking bytes):
 
