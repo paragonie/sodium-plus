@@ -1,3 +1,10 @@
+/* istanbul ignore if */
+if (typeof (Buffer) === 'undefined') {
+    var Buffer = require('buffer/').Buffer;
+    // eslint-disable-next-line no-undef
+    window.Buffer = Buffer;
+}
+
 module.exports = {
     /**
      * This is only meant to be used for advanced users.
